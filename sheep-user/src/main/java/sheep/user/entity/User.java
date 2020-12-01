@@ -1,7 +1,5 @@
 package sheep.user.entity;
 
-
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeId;
@@ -22,14 +20,15 @@ import java.util.Date;
 @Data
 @TableName(value="user")  //表名
 public class User implements Serializable {   //分布式传输实体需要序列化
-    @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
+    @TableId(value = "ID", type = IdType.AUTO)
+    private int ID;
     private String username;
+    private int usertype;
     private String password;
-    private String icon;
+    private String head;
     private String email;
     private String note;
-    private Date create_time;
-    private Date login_time;
+    //private Date create_time;
+    //private Date login_time;
 
 }
