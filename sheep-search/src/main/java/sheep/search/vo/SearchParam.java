@@ -7,18 +7,36 @@ import java.util.List;
 @Data
 public class SearchParam {
     /**
-     * 页面传递过来的全文匹配关键字
+     * 包含所有关键词
      */
-    private String keyword;
+    private String all;
+    /**
+     * 完全匹配关键词
+     */
+    private String accurate ;
+    /**
+     * 包含任意关键词
+     */
+    private String any ;
+    /**
+     * 包含任意关键词
+     */
+    private String exclude ;
+    /**
+     *  刊物
+     */
+    private String venue;
+    /**
+     *  作者
+     */
+    private String author;
+    /**
+     *  领域
+     */
+    private String fos;
 
     /**
-     * 领域id,可以多选
-     */
-    private List<Long> domainId;
-
-
-    /**
-     * 排序条件：sort=year/index_desc/asc
+     * 排序条件：sort=year/n_citation-desc/asc
      */
     private String sort;
 
@@ -26,12 +44,7 @@ public class SearchParam {
     /**
      * 时间区间查询
      */
-    private String interval;
-
-    /**
-     * 按照属性进行筛选
-     */
-    private List<String> attrs;
+    private String yearRange;
 
     /**
      * 页码
