@@ -12,7 +12,11 @@ public enum  ErrorType implements sheep.common.exception.ErrorCode {
     READ_NOTIFICATION_FAILED(2009, "你无权访问该文档"),
     SOMEONE_EDITING(2010, "有人正在编辑文档，你无法进行修改"),
     DOC_DELETED(2011,"文档已删除"),
-    USER_HAVE_ENTER(2012,"该用户已加入团队");
+    USER_HAVE_ENTER(2012,"该用户已加入团队"),
+
+    ADOPT_ERROR(401,"该门户已被认领或您已认领过门户"),
+    CREATE_PORTAL_ERROR(402, "您已拥有门户"),
+    PORTAL_ERROR(403, "门户不存在");
 
 
     @Override
