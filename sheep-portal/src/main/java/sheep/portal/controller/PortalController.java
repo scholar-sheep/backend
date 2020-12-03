@@ -34,7 +34,7 @@ public class PortalController {
      * POST创建门户，路径参数为用户id
      * @return
      */
-    @RequestMapping(value = "/expert/register/{user_id}", method = RequestMethod.POST)
+    @RequestMapping(value = "/portal/register/{user_id}", method = RequestMethod.POST)
     public Object register(@PathVariable("user_id") int user_id, WholePortal wholePortal) {
         try{
             //将wholeportal拆解到mysql里的portal和es里的esportal
@@ -64,7 +64,7 @@ public class PortalController {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/expert/admin/{id}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/portal/admin/{id}", method = RequestMethod.DELETE)
     public Object deletePortal(@PathVariable("id") int id){
         try{
             //删除mysql里的信息
@@ -86,7 +86,7 @@ public class PortalController {
      * @param wholePortal
      * @return
      */
-    @RequestMapping(value="/expert/admin/{id}", method = RequestMethod.PUT)
+    @RequestMapping(value="/portal/admin/{id}", method = RequestMethod.PUT)
     public Object updatePortal(@PathVariable("id") int id, WholePortal wholePortal){
         try{
             Portal portal = new Portal(wholePortal);
@@ -111,7 +111,7 @@ public class PortalController {
      * @return
      */
     @CrossOrigin
-    @RequestMapping(value = "/expert/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/portal/{id}", method = RequestMethod.GET)
     public Object getInformation(@PathVariable("id") int id) {
         try{
             Portal portal = portalService.selectById(id);
@@ -133,7 +133,7 @@ public class PortalController {
      * @param user_id
      * @return
      */
-    @RequestMapping(value = "/expert/apply/{portal_id}")
+    @RequestMapping(value = "/portal/apply/{portal_id}", method = RequestMethod.POST)
     public Object adoptPortal(@PathVariable("portal_id") int portal_id, @RequestParam("user_id") int user_id){
         try{
             portalService.adoptPortal(portal_id, user_id);
@@ -149,7 +149,7 @@ public class PortalController {
      * @param portal_id
      * @return
      */
-    @RequestMapping(value = "/expert/unapply/{portal_id}")
+    @RequestMapping(value = "/portal/unapply/{portal_id}", method = RequestMethod.DELETE)
     public Object unadoptPortal(@PathVariable("portal_id") int portal_id){
         try{
             portalService.unadoptPortal(portal_id);

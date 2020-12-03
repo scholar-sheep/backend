@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="sheep-portal" />
+        <module name="sheep-algorithm" />
+        <module name="sheep-common" />
+        <module name="sheep-user" />
+        <module name="sheep-paper" />
+        <module name="sheep-maintain" />
+        <module name="sheep-search" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="ScholarSheep" target="1.5" />
+      <module name="sheep-algorithm" target="11" />
+      <module name="sheep-common" target="11" />
+      <module name="sheep-maintain" target="11" />
+      <module name="sheep-paper" target="11" />
+      <module name="sheep-portal" target="11" />
+      <module name="sheep-search" target="11" />
+      <module name="sheep-user" target="11" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="sheep-algorithm" options="-parameters" />
+      <module name="sheep-common" options="-parameters" />
+      <module name="sheep-maintain" options="-parameters" />
+      <module name="sheep-paper" options="-parameters" />
+      <module name="sheep-portal" options="-parameters" />
+      <module name="sheep-search" options="-parameters" />
+      <module name="sheep-user" options="-parameters" />
+    </option>
+  </component>
+</project>

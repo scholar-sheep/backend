@@ -13,7 +13,7 @@ public class WholePortal {
     private String position;
     //该学者的h指数
     private int h_index;
-    //记录该作者的所属机构ID
+    //记录该作者的所属机构
     private String org;
     //学者发布的学术成果数量
     private int n_pubs;

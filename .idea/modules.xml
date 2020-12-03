@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/ScholarSheep.iml" filepath="$PROJECT_DIR$/ScholarSheep.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-algorithm/sheep-algorithm.iml" filepath="$PROJECT_DIR$/sheep-algorithm/sheep-algorithm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-common/sheep-common.iml" filepath="$PROJECT_DIR$/sheep-common/sheep-common.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-maintain/sheep-maintain.iml" filepath="$PROJECT_DIR$/sheep-maintain/sheep-maintain.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-paper/sheep-paper.iml" filepath="$PROJECT_DIR$/sheep-paper/sheep-paper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-portal/sheep-portal.iml" filepath="$PROJECT_DIR$/sheep-portal/sheep-portal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-search/sheep-search.iml" filepath="$PROJECT_DIR$/sheep-search/sheep-search.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sheep-user/sheep-user.iml" filepath="$PROJECT_DIR$/sheep-user/sheep-user.iml" />
+    </modules>
+  </component>
+</project>
