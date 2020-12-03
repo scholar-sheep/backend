@@ -1,13 +1,13 @@
 <component name="libraryTable">
   <library name="Maven: org.springframework.cloud:spring-cloud-openfeign-core:3.0.0-SNAPSHOT">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201202.234417-462.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201203.113739-463.jar!/" />
     </CLASSES>
     <JAVADOC>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201202.234417-462-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201203.113739-463-javadoc.jar!/" />
     </JAVADOC>
     <SOURCES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201202.234417-462-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/springframework/cloud/spring-cloud-openfeign-core/3.0.0-SNAPSHOT/spring-cloud-openfeign-core-3.0.0-20201203.113739-463-sources.jar!/" />
     </SOURCES>
   </library>
 </component>
