@@ -12,11 +12,11 @@ public class Portal {
     //学者姓名
     private String name;
     //学者规范化姓名，如"Huibin Xu"
-    private String normalized_name;
+    private String normalizedName;
     //该学者的职称，例如教授
     private String position;
     //该学者的h指数
-    private int h_index;
+    private int hIndex;
 
     public Portal(){
 
@@ -24,9 +24,9 @@ public class Portal {
     public Portal(WholePortal wholePortal){
         this.id = wholePortal.getId();
         this.name = wholePortal.getName();
-        this.normalized_name = wholePortal.getNormalized_name();
+        this.normalizedName = wholePortal.getNormalizedName();
         this.position = wholePortal.getPosition();
-        this.h_index = wholePortal.getH_index();
+        this.hIndex = wholePortal.gethIndex();
     }
 
     //以下在es里

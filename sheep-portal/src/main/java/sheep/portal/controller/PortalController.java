@@ -37,6 +37,7 @@ public class PortalController {
     @RequestMapping(value = "/portal/register/{user_id}", method = RequestMethod.POST)
     public Object register(@PathVariable("user_id") int user_id, WholePortal wholePortal) {
         try{
+            System.out.println(wholePortal.gethIndex());
             //将wholeportal拆解到mysql里的portal和es里的esportal
             Portal portal = new Portal(wholePortal);
             EsPortal esPortal = new EsPortal(wholePortal);

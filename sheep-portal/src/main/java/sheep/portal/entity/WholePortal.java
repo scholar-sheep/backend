@@ -8,11 +8,11 @@ public class WholePortal {
     //学者姓名
     private String name;
     //学者规范化姓名，如"Huibin Xu"
-    private String normalized_name;
+    private String normalizedName;
     //该学者的职称，例如教授
     private String position;
     //该学者的h指数
-    private int h_index;
+    private int hIndex;
     //记录该作者的所属机构
     private String org;
     //学者发布的学术成果数量
@@ -29,9 +29,9 @@ public class WholePortal {
     public WholePortal(Portal mysql, EsPortal es){
         this.id = mysql.getId();
         this.name = mysql.getName();
-        this.normalized_name = mysql.getNormalized_name();
+        this.normalizedName = mysql.getNormalizedName();
         this.position = mysql.getPosition();
-        this.h_index = mysql.getH_index();
+        this.hIndex = mysql.getHIndex();
         this.org = es.getOrg();
         this.n_pubs = es.getN_pubs();
         this.n_citation = es.getN_citation();
@@ -54,12 +54,12 @@ public class WholePortal {
         this.name = name;
     }
 
-    public String getNormalized_name() {
-        return normalized_name;
+    public String getNormalizedName() {
+        return normalizedName;
     }
 
-    public void setNormalized_name(String normalized_name) {
-        this.normalized_name = normalized_name;
+    public void setNormalizedName(String normalizedName) {
+        this.normalizedName = normalizedName;
     }
 
     public String getPosition() {
@@ -70,12 +70,12 @@ public class WholePortal {
         this.position = position;
     }
 
-    public int getH_index() {
-        return h_index;
+    public int gethIndex() {
+        return hIndex;
     }
 
-    public void setH_index(int h_index) {
-        this.h_index = h_index;
+    public void sethIndex(int hIndex) {
+        this.hIndex = hIndex;
     }
 
     public String getOrg() {
@@ -117,4 +117,5 @@ public class WholePortal {
     public void setTags_w(int tags_w) {
         this.tags_w = tags_w;
     }
+
 }

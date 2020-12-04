@@ -54,6 +54,12 @@ public class PortalServiceImp implements PortalService{
         int count = portalMapper.selectCount(new QueryWrapper<Portal>().eq("id", id));
         if(count != 1) throw new NoPortalException();
         //有则正常更新
+        Portal last = portalMapper.selectById(id);
+        portal.setId(last.getId());
+        if(portal.getName() == null) portal.setName(last.getName());
+        if(portal.getNormalizedName() == null) portal.setNormalizedName(last.getNormalizedName());
+        if(portal.getPosition() == null) portal.setPosition(last.getPosition());
+        if(portal.getHIndex() == 0) portal.setHIndex(last.getHIndex());
         return portalMapper.updateById(portal);
     }
 
