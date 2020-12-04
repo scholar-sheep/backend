@@ -1,86 +1,157 @@
 package sheep.user.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
+import sheep.user.entity.Paper;
+import sheep.user.entity.UserCollect;
 import sheep.user.mapper.UserMapper;
 import sheep.user.entity.User;
+import sheep.user.util.HttpUtil;
+import sheep.user.util.StringUtil;
 
-import java.util.Date;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@Service
+
+@Service @Slf4j
 public class UserServiceImp implements UserService{
     @Autowired
     private UserMapper userMapper;
+    //@Autowired
+    //private PaperMapper paperMapper;
+
+    //apikey
+    //@Value("${sms.yunpian.apiKey}")
+    private final String apiKey = "6982fb8a80dfac6af94d87e45c51e45d";
+    //‘单发模板短信’的url
+    //@Value("${sms.yunpian.tplVerUrl}")
+    private final String tplVerUrl = "https://sms.yunpian.com/v2/sms/tpl_single_send.json";
+    //短信模板的id
+    //@Value("${sms.yunpian.tplVerId}")
+    private final String tplVerId = "3922606";
+    //urlencode编码的格式
+    private static final String URLENCODING = "UTF-8";
 
     @Override
     public List<User> getUserList() {
-        try{
-            List<User> users = userMapper.getUserList();
-            return users;
-        }catch (Exception e){
-            throw e;
-        }
+        List<User> users = userMapper.getUserList();
+        return users;
     }
 
     @Override
     public User getUserById(int ID) {
-        try{
-            User user = userMapper.getUserById(ID);
-            return user;
-        }catch (Exception e){
-            throw e;
-        }
+        User user = userMapper.getUserById(ID);
+        return user;
     }
 
     @Override
-    public User updateUserInfo(User user) {
-        try{
-            userMapper.updateUserInfo(user);
-            return getUserById(user.getID());
-        }catch (Exception e){
-            throw e;
-        }
+    public int updateUserInfo(User user) {
+        return userMapper.updateUserInfo(user);
     }
 
     @Override
-    public String addUser(User user) {
-        try{
-            int i = userMapper.addUser(user);
-            return "添加成功"+i+"条数据";
-        }catch (Exception e){
-            throw e;
-        }
+    public int addUser(User user) {
+        return userMapper.addUser(user);
     }
 
     @Override
     public User getUserByName(String username) {
-        try{
-            User user = userMapper.getUserByName(username);
-            return user;
-        }catch (Exception e){
-            throw e;
-        }
+        User user = userMapper.getUserByName(username);
+        return user;
     }
 
     @Override
-    public String changeAvatar(int ID, String avatar) {
-        try {
-            User result = userMapper.getUserById(ID);
-            if (result != null) {
-                result.setHead(avatar);
-                int rows = userMapper.updateUserInfo(result);
-                if(rows==1)return "头像修改成功";
-                else return "头像修改失败";
-            }
-            else return "用户不存在";
-        }catch (Exception e){
-            throw e;
-        }
+    public int getUserByMobile(String mobile) {
+        int result = userMapper.getUserByMobile(mobile);
+        return result;
     }
 
+    @Override
+    public int changeAvatar(int ID, String avatar) {
+        return userMapper.changeAvatar(ID,avatar);
+    }
+
+    @Override
+    public int follow(int currentID, int followID) {
+        return userMapper.follow(currentID,followID);
+    }
+
+    @Override
+    public List<Integer> getFollow(int ID) {
+        return userMapper.getFollow(ID);
+    }
+
+    @Override
+    public String getCode(String mobile) {
+        return this.sendVerificationCodeSms(mobile);
+    }
+
+    @Override
+    public String sendVerificationCodeSms(String mobile) {
+        //验证码
+        String verificationCode = new String();
+
+        try {
+            //生成六位数的验证码。
+            verificationCode = StringUtil.generateVerificationCode(6);
+            log.info("生成验证码{}" , verificationCode);
+            String tpl_value = URLEncoder.encode("#code#", URLENCODING) + "="
+                    + URLEncoder.encode(verificationCode, URLENCODING);
+            Map<String,String> params = new HashMap<>();
+            params.put("apikey",apiKey);
+            params.put("mobile",mobile);
+            params.put("tpl_id",tplVerId);
+            params.put("tpl_value",tpl_value);
+            //发送验证码
+            HttpUtil.post(tplVerUrl,params);
+        }catch (UnsupportedEncodingException e){
+            e.printStackTrace();
+        }
+        //new UserServiceImp().updateUserCode(mobile,verificationCode);
+        System.out.println("sendVerificationCodeSms"+mobile+" "+verificationCode);
+        if(userMapper.getCodeByMobile(mobile)==0){
+            userMapper.insertUserCode(mobile,verificationCode);
+        }
+        else userMapper.updateUserCode(mobile,verificationCode);
+        return verificationCode;
+    }
+
+    @Override
+    public Object getCodeByMobile(String mobile) {
+        return userMapper.getCodeByMobile(mobile);
+    }
+
+    @Override
+    public int updateUserCode(String mobile, String code) {
+        //if(getCodeByMobile(mobile)!=null)
+        //    userMapper.updateUserCode(mobile,code);
+        System.out.println(mobile);
+        System.out.println(code);
+        //MobileCode mobileCode = new MobileCode();
+        //mobileCode.setMobile(mobile);
+        //mobileCode.setCode(code);
+        return userMapper.insertUserCode(mobile,code);
+    }
+
+    @Override
+    public int collect(int userId, int paperId, int infoId) {
+        return userMapper.collect(userId,paperId,infoId);
+    }
+
+    @Override
+    public List<UserCollect> getCollect(int ID) {
+        return userMapper.getCollect(ID);
+    }
+
+    @Override
+    public Paper getPaperById(int paperId,int infoId) {
+        return userMapper.getPaperById(paperId,infoId);
+//        return userMapper.getPaperById(paper_id);
+    }
 
     /**
     public User selectById(int id) {

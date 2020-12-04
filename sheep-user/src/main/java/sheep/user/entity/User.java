@@ -24,10 +24,12 @@ public class User implements Serializable {   //分布式传输实体需要序�
     private int ID;
     private String username;
     private int usertype;
+    private String mobile;
     private String password;
-    private String head;
+    private String avatar;
     private String email;
     private String note;
+    private String code;
     //private Date create_time;
     //private Date login_time;
 

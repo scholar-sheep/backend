@@ -99,6 +99,13 @@
 			<version>0.9.0</version>
 		</dependency>-->
 
+		<!--验证码-->
+		<dependency>
+			<groupId>com.github.qcloudsms</groupId>
+			<artifactId>qcloudsms</artifactId>
+			<version>1.0.6</version>
+		</dependency>
+
 		<!--逆向工程需要模板引擎-->
 		<dependency>
 			<groupId>org.freemarker</groupId>
