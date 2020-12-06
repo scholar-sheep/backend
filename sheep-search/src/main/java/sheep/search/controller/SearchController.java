@@ -3,10 +3,12 @@ package sheep.search.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import sheep.common.exception.ErrorType;
 import sheep.common.utils.ResultDTO;
 import sheep.search.Service.SearchPaperService;
 import sheep.search.Service.*;
@@ -33,6 +35,8 @@ public class SearchController {
 
     @PostMapping(value = {"/searchScholar"})
     public Object Search(@RequestBody ScholarParam searchParam, HttpServletRequest request) {
+        if(StringUtils.isEmpty(searchParam.getName()))
+            return ResultDTO.errorOf(ErrorType.MISS_NANME);
         SearchResult result=searchScholarService.getSearchResult(searchParam);
         return ResultDTO.okOf(result);
     }

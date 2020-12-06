@@ -11,7 +11,7 @@ public class ScholarModel {
     private String name;
     private String org;
     private int n_pubs;
-    private  int n_citations;
+    private  int n_citation;
     private List<Tag> tags;
     private String head;
     @Data
@@ -19,7 +19,7 @@ public class ScholarModel {
     public static class Tag
     {
         private String t;
-        private int i;
+        private int w;
     }
 
 }

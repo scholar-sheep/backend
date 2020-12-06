@@ -70,8 +70,18 @@ public class AdvancedSearchImp implements SearchPaperService {
             for (SearchHit hit : hits) {
                 String sourceAsString = hit.getSourceAsString();
                 PaperModel paperModel = JSON.parseObject(sourceAsString, PaperModel.class);
+                //扁平化作者列表
+                StringBuilder sb=new StringBuilder();
+                List<PaperModel.Author> authors=paperModel.getAuthors();
+                if(authors!=null) {
+                    for (PaperModel.Author author : authors) {
+                        sb.append(author.getName());
+                        sb.append(",");
+                    }
+                    sb.deleteCharAt(sb.length() - 1);
+                    paperModel.setAuthorNames(sb.toString());
+                }
                 //设置高亮属性
-
                 //获得经过高亮处理的字符
                 HighlightField title = hit.getHighlightFields().get("title");
                 if(title!=null){
@@ -194,6 +204,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         //1.7 yearRange
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("year");
         if (!StringUtils.isEmpty(searchParam.getYearRange())) {
+            try{
             String[] years = searchParam.getYearRange().split("_");
             if (years.length == 1) {
                 if (searchParam.getYearRange().startsWith("_")) {
@@ -207,9 +218,13 @@ public class AdvancedSearchImp implements SearchPaperService {
                     rangeQueryBuilder.gte(Integer.parseInt(years[0]));
                 }
                 rangeQueryBuilder.lte(Integer.parseInt(years[1]));
+            }} catch (Exception e)
+            {
+                rangeQueryBuilder.lte(0);
+            }
             }
             boolQueryBuilder.filter(rangeQueryBuilder);
-        }
+
         //1.8搜索结果按领域筛选
         if(!StringUtils.isEmpty(searchParam.getFos()))
         {

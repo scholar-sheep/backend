@@ -15,6 +15,7 @@ public class PaperModel {
     @JSONField(name = "abstract")
     private String Abstract;
     private List<Author> authors;
+    private String authorNames;
     private String venue;
     private int year;
     private int n_citation;
