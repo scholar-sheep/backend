@@ -1,25 +1,24 @@
 package sheep.portal.controller;
 
-import com.alibaba.fastjson.JSON;
-import org.elasticsearch.action.get.GetRequest;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.search.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sheep.common.exception.ErrorType;
 import sheep.common.utils.ResultDTO;
 import sheep.portal.entity.EsPortal;
 import sheep.portal.entity.Portal;
-import sheep.portal.entity.WholePortal;
+import sheep.portal.pojo.PaperList;
+import sheep.portal.pojo.PaperParam;
+import sheep.portal.pojo.WholePortal;
 import sheep.portal.exception.AdoptFailException;
 import sheep.portal.exception.CreatePortalException;
 import sheep.portal.exception.NoPortalException;
 import sheep.portal.service.EsPortalService;
 import sheep.portal.service.PortalService;
 
-import javax.annotation.Resource;
+import javax.naming.directory.SearchResult;
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Optional;
 
 @RestController
 public class PortalController {
@@ -37,7 +36,6 @@ public class PortalController {
     @RequestMapping(value = "/portal/register/{user_id}", method = RequestMethod.POST)
     public Object register(@PathVariable("user_id") int user_id, WholePortal wholePortal) {
         try{
-            System.out.println(wholePortal.gethIndex());
             //将wholeportal拆解到mysql里的portal和es里的esportal
             Portal portal = new Portal(wholePortal);
             EsPortal esPortal = new EsPortal(wholePortal);
@@ -113,11 +111,13 @@ public class PortalController {
      */
     @CrossOrigin
     @RequestMapping(value = "/portal/{id}", method = RequestMethod.GET)
-    public Object getInformation(@PathVariable("id") int id) {
+    public Object getInformation(@PathVariable("id") int id,@RequestParam(required = false,value = "page_num")Integer page_num,
+                                 @RequestParam(required = false,value = "sort") String sort) {
         try{
             Portal portal = portalService.selectById(id);
             EsPortal esPortal = esPortalService.getInformation(id);
-            WholePortal wholePortal = new WholePortal(portal, esPortal);
+            PaperList paperList=esPortalService.getPaperList(String.valueOf(id),sort,page_num);
+            WholePortal wholePortal = new WholePortal(portal, esPortal,paperList);
             return ResultDTO.okOf(wholePortal);
         }
         catch(NoPortalException noPortalException){
@@ -160,4 +160,49 @@ public class PortalController {
         }
         return ResultDTO.okOf();
     }
-}
+    /**
+     * 添加论文，路径参数为门户id 查询参数为论文id
+     * @param portal_id
+     * @param paper_id
+     * @return
+     */
+    @GetMapping(value = "/portal/addPaper/{portal_id}")
+    public Object addPaper(@PathVariable("portal_id")String portal_id,@RequestParam("paper_id")String paper_id) {
+       try
+       {
+           int result=esPortalService.addPaper(portal_id, paper_id);
+           if(result==1) return ResultDTO.okOf();
+           else if(result==2) return ResultDTO.errorOf(ErrorType.ADD_REPEAT_ERROR);
+           else return ResultDTO.errorOf((ErrorType.ADD_PAPER_ERROR));
+       }
+       catch(IOException e)
+       {
+           return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+       }
+    }
+    /**
+     * 删除论文，路径参数为门户id 查询参数为论文id
+     * @param portal_id
+     * @param paper_id
+     * @return
+     */
+    @DeleteMapping(value = "/portal/deletePaper/{portal_id}")
+        public Object delPaper(@PathVariable("portal_id")String portal_id,@RequestParam("paper_id")String paper_id) {
+        try
+        {
+            int result=esPortalService.deletePaper(portal_id, paper_id);
+            if(result==1) return ResultDTO.okOf();
+            else return ResultDTO.errorOf(ErrorType.DELETE_PAPER_ERROR);
+        }
+        catch(IOException e)
+        {
+            return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+        }
+    }
+    @PostMapping(value = "/portal/createPaper/{portal_id}")
+    public Object createPaper(@PathVariable("portal_id")String portal_id, @RequestBody PaperParam paperParam){
+        int result=esPortalService.createPaper(portal_id, paperParam);
+        if(result==1) return ResultDTO.okOf();
+        else return ResultDTO.errorOf(ErrorType.CREATE_PAPER_ERROR); }
+
+    }

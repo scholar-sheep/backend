@@ -13,5 +13,6 @@ public interface PortalService {
     void adoptPortal(int portal_id, int user_id);
     void unadoptPortal(int portal_id);
     int getLastInsertUserID();
+    //int createPaper()
 
 }

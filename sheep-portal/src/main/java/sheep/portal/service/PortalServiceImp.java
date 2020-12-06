@@ -73,6 +73,8 @@ public class PortalServiceImp implements PortalService{
         int count = portalMapper.selectCount(new QueryWrapper<Portal>().eq("id", id));
         if(count != 1) throw new NoPortalException();
         //有则正常返回
+        System.out.println(id);
+        System.out.println(count);
         return portalMapper.selectById(id);
     }
 

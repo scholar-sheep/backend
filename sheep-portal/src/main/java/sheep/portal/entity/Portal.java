@@ -1,10 +1,11 @@
 package sheep.portal.entity;
-import com.baomidou.mybatisplus.annotation.IdType;
 import lombok.Data;
-import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.NoArgsConstructor;
+import sheep.portal.pojo.WholePortal;
 
 @Data
+@NoArgsConstructor
 @TableName(value="portal")  //表名
 public class Portal {
 //    @TableId(value = "id", type = IdType.AUTO)
@@ -17,16 +18,12 @@ public class Portal {
     private String position;
     //该学者的h指数
     private int hIndex;
-
-    public Portal(){
-
-    }
     public Portal(WholePortal wholePortal){
         this.id = wholePortal.getId();
         this.name = wholePortal.getName();
         this.normalizedName = wholePortal.getNormalizedName();
         this.position = wholePortal.getPosition();
-        this.hIndex = wholePortal.gethIndex();
+        this.hIndex = wholePortal.getHIndex();
     }
 
     //以下在es里

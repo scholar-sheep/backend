@@ -1,12 +1,16 @@
 package sheep.portal.entity;
 
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
+import sheep.portal.pojo.WholePortal;
+
+import java.util.List;
 
 @Data
-@Document(indexName = "portal")
+@Document(indexName = "sheep-scholar")
 public class EsPortal {
     @Id
     private int id;
@@ -18,10 +22,24 @@ public class EsPortal {
     private int n_pubs;
     //学者的学术成果被引用次数
     private int n_citation;
-    //学者的研究兴趣标签
-    private String tags_t;
-    //对于研究兴趣的权重
-    private int tags_w;
+
+    private List<Tag>tags;
+    private List<Pub>pubs;
+    @Data
+    @AllArgsConstructor
+    public static class Tag
+    {
+        private String t;
+        private int w;
+    }
+    @Data
+    @AllArgsConstructor
+    public static class Pub
+    {
+        private String i;
+        private int r;
+    }
+
     public EsPortal(){
 
     }
@@ -31,7 +49,6 @@ public class EsPortal {
         this.org = wholePortal.getOrg();
         this.n_pubs = wholePortal.getN_pubs();
         this.n_citation = wholePortal.getN_citation();
-        this.tags_t = wholePortal.getTags_t();
-        this.tags_w = wholePortal.getTags_w();
+        this.tags=wholePortal.getTags();
     }
 }
