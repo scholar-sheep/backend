@@ -6,13 +6,12 @@ import sheep.portal.entity.PortalAndUser;
 
 @Service
 public interface PortalService {
-    Portal selectById(int id);
-    int deleteById(int id);
-    int update(int id, Portal portal);
+    Portal selectById(String id);
+    int deleteById(String id);
+    int update(String id, Portal portal);
+    String findPortalByUserId(int user_id);
     void addPortal(int user_id, Portal portal);
-    void adoptPortal(int portal_id, int user_id);
-    void unadoptPortal(int portal_id);
-    int getLastInsertUserID();
-    //int createPaper()
+    void adoptPortal(String portal_id, int user_id);
+    void unadoptPortal(String portal_id);
 
 }

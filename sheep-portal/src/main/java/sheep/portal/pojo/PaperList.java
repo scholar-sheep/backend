@@ -17,12 +17,12 @@ public class PaperList<T> {
     /**
      * 总记录数
      */
-    private Long total;
+    private int total;
 
     /**
      * 总页码
      */
-    private Integer totalPages;
+    private Long totalPages;
 
 
 }

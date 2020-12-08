@@ -18,11 +18,11 @@ public interface EsPortalService {
 
     void save(EsPortal esPortal);
 
-    void deleteByID(int id);
+    int deleteByID(String id)throws IOException;
 
-    int update(int id, EsPortal esPortal) throws IOException;
+    int update(String id, EsPortal esPortal) throws IOException;
 
-    EsPortal getInformation(int id) throws IOException;
+    EsPortal getInformation(String id) throws IOException;
     void setPaperList(String id) throws IOException;
     PaperList getPaperList(String id,String sort,Integer page_num) throws IOException;
     int addPaper(String portal_id, String paper_id) throws IOException;

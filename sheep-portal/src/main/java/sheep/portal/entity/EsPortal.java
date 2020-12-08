@@ -13,10 +13,10 @@ import java.util.List;
 @Document(indexName = "sheep-scholar")
 public class EsPortal {
     @Id
-    private int id;
+    private String id;
     //学者姓名
     private String name;
-    //记录该作者的所属机构ID
+    //记录该作者的所属机构
     private String org;
     //学者发布的学术成果数量
     private int n_pubs;

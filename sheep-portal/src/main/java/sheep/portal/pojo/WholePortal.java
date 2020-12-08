@@ -11,7 +11,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class WholePortal<T>{
-    private int id;
+    private String id;
     //学者姓名
     private String name;
     //学者规范化姓名，如"Huibin Xu"
