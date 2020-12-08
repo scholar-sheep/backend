@@ -1,4 +1,6 @@
 ### 目录结构
+
+```
 .
 ├───java
 │   └───sheep
@@ -25,3 +27,4 @@
 │
 └───resources
         application.properties                      必要配置
+```
