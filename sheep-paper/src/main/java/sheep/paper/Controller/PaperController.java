@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("api/paper/basic")
+@RequestMapping("/api/paper/basic")
 public class PaperController {
     @Autowired
     private PaperRepository paperRepository;
@@ -131,28 +131,26 @@ public class PaperController {
      * @Param [paperId]
      * @return java.lang.String
      **/
-    @GetMapping("/ref/{paperId}")
-    public Object gerRefString(@PathVariable String paperId) {
-        GetRequest getRequest = new GetRequest("paper", paperId);
-        try {
-            GetResponse response = paperService.getDetail(getRequest);
-            Map<String, Object> sourceInResponse = response.getSourceAsMap();
-            List<Author> authors = (List<Author>) sourceInResponse.get("author");
+    @GetMapping("/ref/{paperIdStr}")
+    public Object gerRefString(@PathVariable String paperIdStr) {
+        Map map = _getEsInfoById(paperIdStr);
+        if (map==null) {
+            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
+        }
+        else {
+            List<Map> authors = (List<Map>) (map.get("author"));
             StringBuilder sb = new StringBuilder();
-            for (Author author: authors) {
-                sb.append(author.getName());
+            for (Map author: authors) {
+                sb.append(author.get("name"));
                 sb.append(',');
             }
             String authorPart = sb.toString();
-            String title = sourceInResponse.get("title").toString();
-            String year = sourceInResponse.get("year").toString();
+            String title = map.get("title").toString();
+            String year = map.get("year").toString();
 //            TODO 规范引用的格式
 //            TODO 文献类型的处理
 //            return sourceInResponse.toString();
             return ResultDTO.okOf(authorPart + title + ',' + '[' + 'J' + "]," + year);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
     }
 
