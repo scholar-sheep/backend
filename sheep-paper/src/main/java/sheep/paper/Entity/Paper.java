@@ -28,16 +28,12 @@ public class Paper implements Serializable {
 //    Data in ElasticSearch
     @Transient
     private String paperAbstract;
-//    TODO 多作者？
     @Transient
-    private String authorName;
-    @Transient
-    private String authorOrg;
+    private List<Author> authors;
     @Transient
     private String fieldOfStudy;
-//    TODO keywords 应该改为 List<String>
     @Transient
-    private String keywords;
+    private List<String> keywords;
     @Transient
     private int nCitation;
     @Transient
@@ -145,20 +141,20 @@ public class Paper implements Serializable {
         this.paperAbstract = paperAbstract;
     }
 
-    public String getAuthorName() {
-        return authorName;
+    public List<Author> getAuthors() {
+        return authors;
     }
 
-    public void setAuthorName(String authorName) {
-        this.authorName = authorName;
+    public void setAuthors(List<Author> authors) {
+        this.authors = authors;
     }
 
-    public String getAuthorOrg() {
-        return authorOrg;
+    public void appendAuthors(Author new_author) {
+        this.authors.add(new_author);
     }
 
-    public void setAuthorOrg(String authorOrg) {
-        this.authorOrg = authorOrg;
+    public void setKeywords(List<String> keywords) {
+        this.keywords = keywords;
     }
 
     public String getFieldOfStudy() {
@@ -167,14 +163,6 @@ public class Paper implements Serializable {
 
     public void setFieldOfStudy(String fieldOfStudy) {
         this.fieldOfStudy = fieldOfStudy;
-    }
-
-    public String getKeywords() {
-        return keywords;
-    }
-
-    public void setKeywords(String keywords) {
-        this.keywords = keywords;
     }
 
     public int getnCitation() {

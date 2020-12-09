@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import sheep.common.exception.ErrorType;
 import sheep.common.utils.ResultDTO;
+import sheep.paper.Entity.Author;
 import sheep.paper.Entity.Paper;
 import sheep.paper.Repository.PaperRepository;
 import sheep.paper.Service.PaperService;
@@ -108,10 +109,13 @@ public class PaperController {
                 paper = new Paper();
             }
             paper.setPaperAbstract((String) responseMap.get("abstract"));
-            paper.setAuthorName((String) ((Map<String, Object>) responseMap.get("author")).get("name"));
-            paper.setAuthorOrg((String) ((Map<String, Object>) responseMap.get("author")).get("org"));
+//            List<Author> authors = (List<Author>) responseMap.get("author");
+//            for (Author author : authors) {
+//                paper.appendAuthors(author);
+//            }
+            paper.setAuthors((List<Author>) responseMap.get("author"));
             paper.setFieldOfStudy((String) responseMap.get("fos"));
-            paper.setKeywords((String) responseMap.get("keywords"));
+            paper.setKeywords((List<String>) responseMap.get("keywords"));
             paper.setnCitation((Integer) responseMap.get("n_citation"));
             paper.setTitle((String) responseMap.get("title"));
             paper.setUrl((String) responseMap.get("url"));

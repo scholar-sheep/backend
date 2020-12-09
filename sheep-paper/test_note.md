@@ -96,15 +96,15 @@ webapp 使用 8080 端口，es 使用 9200 9300 端口，kibana 使用 5601 端�
 #### 数据插入
 
 ``` JSON
-GET localhost:9200/paper/_doc/1
+POST localhost:9200/paper/_doc/1
 {
     "abstract":"simple abstract",
-    "author":{
+    "author":[{
         "name":"author name",
         "org":"author org"
-    },
+    }],
     "fos":"some fos",
-    "keywords":"some keywords",
+    "keywords":["some keywords"],
     "n_citation":114514,
     "title":"paper title",
     "url":"127.0.0.1",
