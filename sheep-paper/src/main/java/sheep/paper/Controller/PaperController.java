@@ -137,15 +137,19 @@ public class PaperController {
         try {
             GetResponse response = paperService.getDetail(getRequest);
             Map<String, Object> sourceInResponse = response.getSourceAsMap();
-//            TODO 稍后处理一下多个作者的情况
-            Map<String, Object> author = (Map<String, Object>) sourceInResponse.get("author");
-            String authorName = author.get("name").toString();
+            List<Author> authors = (List<Author>) sourceInResponse.get("author");
+            StringBuilder sb = new StringBuilder();
+            for (Author author: authors) {
+                sb.append(author.getName());
+                sb.append(',');
+            }
+            String authorPart = sb.toString();
             String title = sourceInResponse.get("title").toString();
             String year = sourceInResponse.get("year").toString();
 //            TODO 规范引用的格式
 //            TODO 文献类型的处理
 //            return sourceInResponse.toString();
-            return ResultDTO.okOf(authorName + ',' + title + ',' + '[' + 'J' + "]," + year);
+            return ResultDTO.okOf(authorPart + title + ',' + '[' + 'J' + "]," + year);
         } catch (IOException e) {
             e.printStackTrace();
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
