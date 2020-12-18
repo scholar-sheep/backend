@@ -150,45 +150,76 @@ public class AdvancedSearchImp implements SearchPaperService {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         //1. 构建bool query
         BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
-        //1.1  包含全部关键词
-        if(!StringUtils.isEmpty(searchParam.getAll()))
+        //关键词出现位置仅标题
+        if(searchParam.getPos()==1)
         {
-            BoolQueryBuilder tmp=new BoolQueryBuilder();
-            boolQueryBuilder.must(
-                   tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAll(),"title","abstract","venue").operator(Operator.AND))
-                        .should(QueryBuilders.nestedQuery("authors",QueryBuilders.matchQuery("authors.name",searchParam.getAll()).operator(Operator.AND),ScoreMode.Avg))
-            );
+            //1.1  包含全部关键词
+            if (!StringUtils.isEmpty(searchParam.getAll())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAll(), "title").operator(Operator.AND))
+                );
+            }
+            //1.2 包含完整关键词
+            if (!StringUtils.isEmpty(searchParam.getAccurate())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.matchPhraseQuery("title", searchParam.getAccurate()))
+                );
+            }
+            //1.3包含任意关键词
+            if (!StringUtils.isEmpty(searchParam.getAny())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAny(), "title"))
+                );
+            }
+            //1.4 不含以下任意字词
+            if (!StringUtils.isEmpty(searchParam.getExclude())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.mustNot(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getExclude(), "title"))
+                );
+            }
         }
-        //1.2 包含完整关键词
-        if(!StringUtils.isEmpty(searchParam.getAccurate()))
-        {
-            BoolQueryBuilder tmp=new BoolQueryBuilder();
+        //关键词在任何位置出现
+        else {
+            //1.1  包含全部关键词
+            if (!StringUtils.isEmpty(searchParam.getAll())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAll(), "title", "abstract", "venue").operator(Operator.AND))
+                                .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getAll()).operator(Operator.AND), ScoreMode.Avg))
+                );
+            }
+            //1.2 包含完整关键词
+            if (!StringUtils.isEmpty(searchParam.getAccurate())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
 
-            boolQueryBuilder.must(
-                    tmp.should(QueryBuilders.matchPhraseQuery("title",searchParam.getAccurate()))
-                            .should(QueryBuilders.matchPhraseQuery("abstract",searchParam.getAccurate()))
-                            .should(QueryBuilders.matchPhraseQuery("venue",searchParam.getAccurate()))
-                            .should(QueryBuilders.nestedQuery("authors",QueryBuilders.matchPhraseQuery("authors.name",searchParam.getAccurate()),ScoreMode.Avg))
-                            .minimumShouldMatch(1)
-            );
-        }
-        //1.3包含任意关键词
-        if(!StringUtils.isEmpty(searchParam.getAny()))
-        {
-            BoolQueryBuilder tmp=new BoolQueryBuilder();
-            boolQueryBuilder.must(
-                    tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAny(),"title","abstract","venue"))
-                    .should(QueryBuilders.nestedQuery("authors",QueryBuilders.matchQuery("authors.name",searchParam.getAny()),ScoreMode.Avg))
-            );
-        }
-        //1.4 不含以下任意字词
-        if(!StringUtils.isEmpty(searchParam.getExclude()))
-        {
-            BoolQueryBuilder tmp=new BoolQueryBuilder();
-            boolQueryBuilder.mustNot(
-                    tmp.should(QueryBuilders.multiMatchQuery(searchParam.getExclude(),"title","abstract","venue"))
-                            .should(QueryBuilders.nestedQuery("authors",QueryBuilders.matchQuery("authors.name",searchParam.getExclude()),ScoreMode.Avg))
-            );
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.matchPhraseQuery("title", searchParam.getAccurate()))
+                                .should(QueryBuilders.matchPhraseQuery("abstract", searchParam.getAccurate()))
+                                .should(QueryBuilders.matchPhraseQuery("venue", searchParam.getAccurate()))
+                                .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchPhraseQuery("authors.name", searchParam.getAccurate()), ScoreMode.Avg))
+                                .minimumShouldMatch(1)
+                );
+            }
+            //1.3包含任意关键词
+            if (!StringUtils.isEmpty(searchParam.getAny())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.must(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAny(), "title", "abstract", "venue"))
+                                .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getAny()), ScoreMode.Avg))
+                );
+            }
+            //1.4 不含以下任意字词
+            if (!StringUtils.isEmpty(searchParam.getExclude())) {
+                BoolQueryBuilder tmp = new BoolQueryBuilder();
+                boolQueryBuilder.mustNot(
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getExclude(), "title", "abstract", "venue"))
+                                .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getExclude()), ScoreMode.Avg))
+                );
+            }
         }
         //1.5指定刊物
         if(!StringUtils.isEmpty(searchParam.getVenue()))
@@ -201,7 +232,7 @@ public class AdvancedSearchImp implements SearchPaperService {
             boolQueryBuilder.must(QueryBuilders.nestedQuery("authors",QueryBuilders.matchQuery("authors.name",searchParam.getAuthor()),ScoreMode.Avg));
         }
 
-        //1.7 yearRange
+        //1.7 指定时间区间
         RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery("year");
         if (!StringUtils.isEmpty(searchParam.getYearRange())) {
             try{
