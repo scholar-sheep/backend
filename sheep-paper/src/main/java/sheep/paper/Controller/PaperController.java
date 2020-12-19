@@ -27,11 +27,11 @@ public class PaperController {
     @Autowired
     private PaperService paperService;
 
-    public Paper _getMySqlInfoById(int paperId) {
+    private Paper _getMySqlInfoById(int paperId) {
         return paperRepository.findPaperByPaperId(paperId);
     }
 
-    public Map<String, Object> _getEsInfoById(String paperIdStr) {
+    private Map<String, Object> _getEsInfoById(String paperIdStr) {
         GetRequest getRequest = new GetRequest("paper", paperIdStr);
         try {
             GetResponse response = paperService.getDetail(getRequest);
@@ -133,24 +133,100 @@ public class PaperController {
      **/
     @GetMapping("/ref/{paperIdStr}")
     public Object gerRefString(@PathVariable String paperIdStr) {
+        int paperid;
+        try {
+            paperid = Integer.parseInt(paperIdStr);
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
+        }
+        Paper paper = _getMySqlInfoById(paperid);
+
         Map map = _getEsInfoById(paperIdStr);
-        if (map==null) {
+
+        if (map==null || paper==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
         else {
             List<Map> authors = (List<Map>) (map.get("author"));
             StringBuilder sb = new StringBuilder();
+            // TODO 作者数量大于 6 时应该最多写 6 个？暂时就都加上吧
             for (Map author: authors) {
                 sb.append(author.get("name"));
-                sb.append(',');
+                sb.append('.');
             }
             String authorPart = sb.toString();
             String title = map.get("title").toString();
             String year = map.get("year").toString();
-//            TODO 规范引用的格式
-//            TODO 文献类型的处理
-//            return sourceInResponse.toString();
-            return ResultDTO.okOf(authorPart + title + ',' + '[' + 'J' + "]," + year);
+            // 论文的类型编号暂时设计如下：
+            // 0 - 期刊类 - J
+            // 1 - 专著类 - M
+            // 2 - 报纸类 - N
+            // 3 - 论文集 - C
+            // 4 - 学位论文 - D
+            // 5 - 研究报告 - R
+            // 6 - 译注 - M
+            // 7 - 其他 - Z
+            // TODO 某些项为空的处理？
+            int type = paper.getDocType();
+            switch (type) {
+                case 0: {
+                    String venue = paper.getVenue();
+                    int volume = paper.getVolume();
+                    int issue = paper.getIssue();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'J' + "]." + venue + '.' + year + '.'
+                            + volume + '(' + issue + "):" + start + '-' + end + '.');
+                }
+                case 1:
+                case 6: {
+                    String venue = paper.getVenue();
+                    String publisher = paper.getPublisher();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'M' + "]." + venue + ':' + publisher
+                            + '.' + year + ':' + start + '-' + end + '.');
+                }
+                case 2: {
+                    String publisher = paper.getPublisher();
+                    int issue = paper.getIssue();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'N' + "]." + publisher
+                            + '.' + year + '(' + issue + ")" + '.');
+                }
+                case 3: {
+                    String venue = paper.getVenue();
+                    String publisher = paper.getPublisher();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'C' + "]." + venue + ':' + publisher
+                            + '.' + year + ':' + start + '-' + end + '.');
+                }
+                case 4: {
+                    String venue = paper.getVenue();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'D' + "]." + venue + ':'
+                            + authors.get(0).get("name") + '.' + year + ':' + start + '-' + end + '.');
+                }
+                case 5: {
+                    String venue = paper.getVenue();
+                    String publisher = paper.getPublisher();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'R' + "]." + venue + ':' + publisher
+                            + '.' + year + ':' + start + '-' + end + '.');
+                }
+                default: {
+                    String venue = paper.getVenue();
+                    int volume = paper.getVolume();
+                    int issue = paper.getIssue();
+                    int start = paper.getPaperStat();
+                    int end = paper.getPaperEnd();
+                    return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'Z' + "]." + venue + '.' + year + '.'
+                            + volume + '(' + issue + "):" + start + '-' + end + '.');
+                }
+            }
+
         }
     }
 
