@@ -140,10 +140,11 @@ public class EsPortalServiceImp implements EsPortalService{
             this.setPaperList(id);
         PaperList paperList=new PaperList();
         List<PaperModel> list=(List)redisUtil.sort(id,id+"->",offset,pageSize,sort);
+        Long total=redisUtil.lGetListSize(id);
         paperList.setResults(list);
         paperList.setPageNum(page_num);
-        paperList.setTotal(list.size());
-        paperList.setTotalPages(list.size()%pageSize+1);
+        paperList.setTotal(total);
+        paperList.setTotalPages(total%pageSize==0?total/pageSize:total/pageSize+1);
         return paperList;
     }
     @Override

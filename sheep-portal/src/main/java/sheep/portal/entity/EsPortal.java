@@ -44,7 +44,7 @@ public class EsPortal {
 
     }
     public EsPortal(WholePortal wholePortal){
-        this.id = wholePortal.getId();
+        this.id = wholePortal.getPortal_id();
         this.name = wholePortal.getName();
         this.org = wholePortal.getOrg();
         this.n_pubs = wholePortal.getN_pubs();
