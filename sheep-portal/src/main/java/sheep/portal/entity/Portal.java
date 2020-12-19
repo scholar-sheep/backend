@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.NoArgsConstructor;
 import sheep.portal.pojo.WholePortal;
 
+import java.util.UUID;
+
 @Data
 @NoArgsConstructor
 @TableName(value="portal")  //表名
 public class Portal {
 //    @TableId(value = "id", type = IdType.AUTO)
-    private int id;
+    private String id;
     //学者姓名
     private String name;
     //学者规范化姓名，如"Huibin Xu"
@@ -19,7 +21,7 @@ public class Portal {
     //该学者的h指数
     private int hIndex;
     public Portal(WholePortal wholePortal){
-        this.id = wholePortal.getId();
+        this.id = UUID.randomUUID().toString();
         this.name = wholePortal.getName();
         this.normalizedName = wholePortal.getNormalizedName();
         this.position = wholePortal.getPosition();

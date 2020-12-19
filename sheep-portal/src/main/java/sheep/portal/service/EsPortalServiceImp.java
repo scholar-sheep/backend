@@ -2,6 +2,8 @@ package sheep.portal.service;
 
 import com.alibaba.fastjson.JSON;
 import org.elasticsearch.action.DocWriteResponse;
+import org.elasticsearch.action.delete.DeleteRequest;
+import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.update.UpdateRequest;
@@ -47,15 +49,23 @@ public class EsPortalServiceImp implements EsPortalService{
     }
 
     @Override
-    public void deleteByID(int id){
-        esPortalMapper.deleteById(id);
+    //删除失败返回2
+    //成功返回1
+    public int deleteByID(String id)throws IOException{
+        DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar",id);
+        DeleteResponse deleteResponse = highLevelClient.delete(
+                deleteRequest, RequestOptions.DEFAULT);
+        if (deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND) {
+            return 2;
+        }
+        return 1;
     }
 
     @Override
     //成功更新返回1
     //无更新返回2
     //更新失败返回3
-    public int update(int id, EsPortal esPortal) throws IOException {
+    public int update(String id, EsPortal esPortal) throws IOException {
         //构建改的hashmap
         Map<String, Object> jsonMap = new HashMap<>();
         if(esPortal.getName() != null) jsonMap.put("name", esPortal.getName());
@@ -64,7 +74,7 @@ public class EsPortalServiceImp implements EsPortalService{
         if(esPortal.getN_citation() != 0) jsonMap.put("n_citation", esPortal.getN_citation());
         if(esPortal.getTags()!= null) jsonMap.put("tags_t", esPortal.getTags());
         //构建updateRequest
-        UpdateRequest updateRequest = new UpdateRequest("portal", "_doc", String.valueOf(id));
+        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", id);
         updateRequest.doc(jsonMap);
         UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
         if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED)
@@ -75,8 +85,8 @@ public class EsPortalServiceImp implements EsPortalService{
     }
 
     @Override
-    public EsPortal getInformation(int id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar", String.valueOf(id));
+    public EsPortal getInformation(String id) throws IOException {
+        GetRequest getRequest = new GetRequest("sheep-scholar",id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
@@ -110,10 +120,12 @@ public class EsPortalServiceImp implements EsPortalService{
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
         List<EsPortal.Pub> pubs=esPortal.getPubs();
         //封装学者的论文列表
-        for(EsPortal.Pub pub:pubs)
+        if(pubs!=null)
         {
-            PaperModel paperModel=this.getPaperDetail(pub.getI());
-            redisUtil.lSet(id,paperModel);
+            for (EsPortal.Pub pub : pubs) {
+                PaperModel paperModel = this.getPaperDetail(pub.getI());
+                redisUtil.lSet(id, paperModel);
+            }
         }
 
     }
@@ -128,7 +140,11 @@ public class EsPortalServiceImp implements EsPortalService{
             this.setPaperList(id);
         PaperList paperList=new PaperList();
         List<PaperModel> list=(List)redisUtil.sort(id,id+"->",offset,pageSize,sort);
+        Long total=redisUtil.lGetListSize(id);
         paperList.setResults(list);
+        paperList.setPageNum(page_num);
+        paperList.setTotal(total);
+        paperList.setTotalPages(total%pageSize==0?total/pageSize:total/pageSize+1);
         return paperList;
     }
     @Override
@@ -158,7 +174,6 @@ public class EsPortalServiceImp implements EsPortalService{
             PaperModel paper=(PaperModel)item;
             if(paper.getId().equals(paper_id)){
                 return redisUtil.lRemove(portal_id,0,item)>0?1:0;
-
             }
         }
         return 0;

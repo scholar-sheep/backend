@@ -36,7 +36,7 @@ public class PortalServiceImp implements PortalService{
      * @param id
      * @return
      */
-    public int deleteById(int id){
+    public int deleteById(String id){
         //有没有该门户，没有则返回找不到门户错误
         int count = portalMapper.selectCount(new QueryWrapper<Portal>().eq("id", id));
         if(count != 1) throw new NoPortalException();
@@ -49,7 +49,7 @@ public class PortalServiceImp implements PortalService{
      * @param portal
      * @return
      */
-    public int update(int id, Portal portal){
+    public int update(String id, Portal portal){
         //有没有该门户，没有则返回找不到门户错误
         int count = portalMapper.selectCount(new QueryWrapper<Portal>().eq("id", id));
         if(count != 1) throw new NoPortalException();
@@ -68,13 +68,10 @@ public class PortalServiceImp implements PortalService{
      * @param id
      * @return
      */
-    public Portal selectById(int id) {
+    public Portal selectById(String id) {
         //有没有该门户，没有则返回找不到门户错误
         int count = portalMapper.selectCount(new QueryWrapper<Portal>().eq("id", id));
         if(count != 1) throw new NoPortalException();
-        //有则正常返回
-        System.out.println(id);
-        System.out.println(count);
         return portalMapper.selectById(id);
     }
 
@@ -85,7 +82,7 @@ public class PortalServiceImp implements PortalService{
      * @param user_id
      * @return
      */
-    public void adoptPortal (int portal_id, int user_id){
+    public void adoptPortal (String portal_id, int user_id){
         //该门户有没有被认领过
         int count1 = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("portal_id", portal_id));
         //该用户有没有认领过门户
@@ -99,19 +96,21 @@ public class PortalServiceImp implements PortalService{
      * 取消认领门户，传入被取消门户的id
      * @param portal_id
      */
-    public void unadoptPortal(int portal_id){
+    public void unadoptPortal(String portal_id){
         //该门户有没有被认领过
         int count = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("portal_id", portal_id));
         if(count != 1) throw new AdoptFailException();
         portalAndUserMapper.unadoptPortal(portal_id);
     }
-
     /**
-     * 为了创建门户时同时插入es和mysql，先插入mysql后要获得自动生成的id，再将该id插入es
-     * @return
+     * 根据用户id查找门户id
+     * @param user_id
      */
-    public int getLastInsertUserID(){
-        return portalMapper.getLastInsertUserID();
+    public String findPortalByUserId(int user_id)
+    {
+        int count = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("user_id", user_id));
+        if(count != 1) throw new NoPortalException();
+      return portalAndUserMapper.findByUser_id(user_id);
     }
 
 }

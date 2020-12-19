@@ -34,7 +34,6 @@ public class PaperModel {
         this.id= UUID.randomUUID().toString();
         this.title=paperParam.getTitle();
         this.Abstract=paperParam.getAbstract();
-        //this.authors=paperParam.getAuthors();
         this.venue=paperParam.getVenue();
         this.year=paperParam.getYear();
         this.n_citation= paperParam.getN_citation();

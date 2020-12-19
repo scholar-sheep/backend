@@ -1,6 +1,5 @@
 package sheep.portal.pojo;
 
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import sheep.portal.entity.EsPortal;
@@ -11,7 +10,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class WholePortal<T>{
-    private int id;
+    private String portal_id;
     //学者姓名
     private String name;
     //学者规范化姓名，如"Huibin Xu"
@@ -30,7 +29,7 @@ public class WholePortal<T>{
     private PaperList<T> paperList;
 
     public WholePortal(Portal mysql, EsPortal es,PaperList<T> paperList){
-        this.id = mysql.getId();
+        this.portal_id = mysql.getId();
         this.name = mysql.getName();
         this.normalizedName = mysql.getNormalizedName();
         this.position = mysql.getPosition();

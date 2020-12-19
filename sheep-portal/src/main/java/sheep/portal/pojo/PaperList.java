@@ -22,7 +22,7 @@ public class PaperList<T> {
     /**
      * 总页码
      */
-    private Integer totalPages;
+    private Long totalPages;
 
 
 }
