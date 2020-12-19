@@ -3,18 +3,19 @@ package sheep.paper.Controller;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sheep.common.exception.ErrorType;
 import sheep.common.utils.ResultDTO;
 import sheep.paper.Entity.Author;
+import sheep.paper.Entity.BriefPaperInfo;
+import sheep.paper.Entity.Favorite;
 import sheep.paper.Entity.Paper;
+import sheep.paper.Repository.FavoriteRepository;
 import sheep.paper.Repository.PaperRepository;
 import sheep.paper.Service.PaperService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +27,9 @@ public class PaperController {
 
     @Autowired
     private PaperService paperService;
+
+    @Autowired
+    private FavoriteRepository favoriteRepository;
 
     private Paper _getMySqlInfoById(int paperId) {
         return paperRepository.findPaperByPaperId(paperId);
@@ -123,6 +127,93 @@ public class PaperController {
             paper.setYear((Integer) responseMap.get("year"));
             return ResultDTO.okOf(paper);
         }
+    }
+
+    /*
+     *
+     * @Description 获取用于展示列表的简略信息
+     * @Param [paperIdStr]
+     * @return java.lang.Object
+     **/
+    @GetMapping("/info/brief/{paperIdStr}")
+    public Object getBriefInfoById(@PathVariable String paperIdStr) {
+        int paperId;
+        try {
+            paperId = Integer.parseInt(paperIdStr);
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
+        }
+        Paper paper = this._getMySqlInfoById(paperId);
+        Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
+        if (paper == null && responseMap==null) {
+            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
+        }
+        BriefPaperInfo paperInfo = new BriefPaperInfo();
+        paperInfo.setPaperId(paperId);
+        paperInfo.setPaperTitle((String) responseMap.get("title"));
+        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
+        List<Author> authorList =  (List<Author>) responseMap.get("author");
+        List<String> authorNameList = new ArrayList<>();
+        for (Author author : authorList) {
+            authorNameList.add(author.getName());
+        }
+        paperInfo.setAuthorNames(authorNameList);
+        paperInfo.setDocType(paper.getDocType());
+        paperInfo.setLang(paper.getLang());
+        paperInfo.setPublisher(paper.getPublisher());
+        paperInfo.setPdfLink(paper.getPdfLink());
+        // TODO 获取userid？
+        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(0, paperId);
+        paperInfo.setFavored(favorite != null);
+        return ResultDTO.okOf(favorite);
+    }
+
+    /*
+     *
+     * @Description 收藏学术成果
+     * @Param [userId, paperId, infoId]
+     * @return java.lang.Object
+     **/
+    @PostMapping(value = "/collect")
+    public Object collect(int userId,int paperId){
+        Favorite favorite = paperService.favor(userId, paperId);
+        if(favorite!=null)
+            return ResultDTO.okOf(favorite);
+        else return ResultDTO.errorOf(ErrorType.INSERT_ERROR);
+    }
+
+    /*
+     *
+     * @Description 查看收藏列表
+     * @Param [ID]
+     * @return java.lang.Object
+     **/
+    @RequestMapping(value = "/collect/{ID}",method = RequestMethod.GET)
+    public Object getCollect(@PathVariable("ID") int ID){
+        List<Favorite> result = paperService.getfavorites(ID);
+        List<BriefPaperInfo> paperList = new ArrayList<>();
+        for (Favorite favorite : result) {
+            int paperId = favorite.getPaperid();
+            Paper paper = this._getMySqlInfoById(paperId);
+            Map<String, Object> responseMap = this._getEsInfoById(String.valueOf(paperId));
+            BriefPaperInfo paperInfo = new BriefPaperInfo();
+            paperInfo.setPaperId(paperId);
+            paperInfo.setPaperTitle((String) responseMap.get("title"));
+            paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
+            List<Author> authorList =  (List<Author>) responseMap.get("author");
+            List<String> authorNameList = new ArrayList<>();
+            for (Author author : authorList) {
+                authorNameList.add(author.getName());
+            }
+            paperInfo.setAuthorNames(authorNameList);
+            paperInfo.setDocType(paper.getDocType());
+            paperInfo.setLang(paper.getLang());
+            paperInfo.setPublisher(paper.getPublisher());
+            paperInfo.setPdfLink(paper.getPdfLink());
+            paperInfo.setFavored(true);
+            paperList.add(paperInfo);
+        }
+        return ResultDTO.okOf(paperList);
     }
 
     /*
