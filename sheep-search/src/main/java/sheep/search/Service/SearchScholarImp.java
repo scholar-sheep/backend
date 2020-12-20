@@ -10,14 +10,14 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import sheep.search.config.EsConfig;
-import sheep.search.vo.*;
-
+import sheep.search.vo.ScholarModel;
+import sheep.search.vo.ScholarParam;
+import sheep.search.vo.SearchResult;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -65,7 +65,7 @@ public class SearchScholarImp implements SearchScholarService {
         searchSourceBuilder.size(pagesize);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-scholar"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-scholar-test"}, searchSourceBuilder);
         return request;
     }
 
