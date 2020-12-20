@@ -13,5 +13,10 @@ public interface PortalService {
     void addPortal(int user_id, Portal portal);
     void adoptPortal(String portal_id, int user_id);
     void unadoptPortal(String portal_id);
+    int isAdopt(String portal_id, int user_id);
+
+    void follow(String portal_id, int user_id);
+    void unfollow(String portal_id, int user_id);
+    int isFollow(String portal_id, int user_id);
 
 }

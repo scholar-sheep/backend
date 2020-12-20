@@ -9,7 +9,8 @@ public enum ErrorType implements ErrorCode {
     ADD_REPEAT_ERROR(4004,"已添加此论文"),
     ADD_PAPER_ERROR(4005,"添加论文失败"),
     DELETE_PAPER_ERROR(4006,"删除论文失败"),
-    CREATE_PAPER_ERROR(4007,"创建论文失败");
+    CREATE_PAPER_ERROR(4007,"创建论文失败"),
+    FOLLOW_ERROR(4008, "关注失败");
 
 
 

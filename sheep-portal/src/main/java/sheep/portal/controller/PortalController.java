@@ -34,7 +34,7 @@ public class PortalController {
      * POST创建门户
      * @return
      */
-    @RequestMapping(value = "/portal/register/", method = RequestMethod.POST)
+    @RequestMapping(value = "/portal/register", method = RequestMethod.POST)
     @LoginRequired
     public Object register(@RequestBody WholePortal wholePortal) {
         try{
@@ -147,7 +147,7 @@ public class PortalController {
      * @return
      */
 
-    @RequestMapping(value = "/portal/apply/", method = RequestMethod.POST)
+    @RequestMapping(value = "/portal/apply", method = RequestMethod.POST)
     @LoginRequired
     public Object adoptPortal(@RequestParam(value = "portal_id") String portal_id){
         try{
@@ -207,7 +207,7 @@ public class PortalController {
      */
     @DeleteMapping(value = "/portal/deletePaper/")
     @Permissions(role="isOwnerOrAdmin")
-        public Object delPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
+    public Object delPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
         try
         {
             int result=esPortalService.deletePaper(portal_id, paper_id);
@@ -252,4 +252,64 @@ public class PortalController {
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
     }
+
+    /**
+     * 用户关注学者
+     * @param portal_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/follow", method = RequestMethod.POST)
+    @LoginRequired
+    public Object follow(@RequestParam(value = "portal_id") String portal_id){
+        try{
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+            portalService.follow(portal_id, user_id);
+        }
+        catch(Exception e){
+            return ResultDTO.errorOf(ErrorType.FOLLOW_ERROR);
+        }
+        return ResultDTO.okOf();
+    }
+
+    /**
+     * 用户取消关注学者
+     * @param portal_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/unfollow", method = RequestMethod.DELETE)
+    @LoginRequired
+    public Object unfollow(@RequestParam(value = "portal_id") String portal_id){
+        try{
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+            portalService.unfollow(portal_id, user_id);
+        }
+        catch (Exception e){
+            return ResultDTO.errorOf(ErrorType.FOLLOW_ERROR);
+        }
+        return ResultDTO.okOf();
+    }
+
+    /**
+     * 判断当前用户与该学者的关系
+     * @param portal_id
+     * @return 关注关系： ；认领关系： ；没关系：；
+     */
+    @RequestMapping(value = "/portal/relationship", method = RequestMethod.GET)
+    @LoginRequired
+    public Object userAndPortalRelationship(@RequestParam(value = "portal_id") String portal_id){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+        if(portalService.isAdopt(portal_id, user_id) == 1)
+            return ResultDTO.okOf("认领关系");
+        else if(portalService.isFollow(portal_id, user_id) == 1)
+            return ResultDTO.okOf("关注关系");
+        else
+            return ResultDTO.okOf("没关系");
+    }
+
 }
