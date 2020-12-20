@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/paper/basic")
+@RequestMapping("/paper/basic")
 public class PaperController {
     @Autowired
     private PaperRepository paperRepository;
@@ -31,10 +31,23 @@ public class PaperController {
     @Autowired
     private FavoriteRepository favoriteRepository;
 
+    // ==      以下为类内调用方法     ==
+    /*
+     *
+     * @Description 在 MySQL 中查询论文信息，供类内调用
+     * @Param [paperId]
+     * @return sheep.paper.Entity.Paper
+     **/
     private Paper _getMySqlInfoById(int paperId) {
         return paperRepository.findPaperByPaperId(paperId);
     }
 
+    /*
+     *
+     * @Description 在 Elastic Search 中查询论文信息，供类内调用
+     * @Param [paperIdStr]
+     * @return java.util.Map<java.lang.String,java.lang.Object>
+     **/
     private Map<String, Object> _getEsInfoById(String paperIdStr) {
         GetRequest getRequest = new GetRequest("paper", paperIdStr);
         try {
@@ -45,6 +58,69 @@ public class PaperController {
             return null;
         }
     }
+
+    /*
+     *
+     * @Description 构造 BriefPaperInfo 对象，不包含是否收藏的信息
+     * @Param [paper, responseMap]
+     * @return sheep.paper.Entity.BriefPaperInfo
+     **/
+    private BriefPaperInfo _makeUpBriefPaperInfoWithOutFavorInfo(Paper paper, Map<String, Object> responseMap) {
+        if (paper == null && responseMap==null) {
+            return null;
+        }
+        BriefPaperInfo paperInfo = new BriefPaperInfo();
+        paperInfo.setPaperId(paper.getPaperId());
+        paperInfo.setPaperTitle((String) responseMap.get("title"));
+        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
+        List<Author> authorList =  (List<Author>) responseMap.get("author");
+        List<String> authorNameList = new ArrayList<>();
+        for (Author author : authorList) {
+            authorNameList.add(author.getName());
+        }
+        paperInfo.setAuthorNames(authorNameList);
+        paperInfo.setDocType(paper.getDocType());
+        paperInfo.setLang(paper.getLang());
+        paperInfo.setPublisher(paper.getPublisher());
+        paperInfo.setPdfLink(paper.getPdfLink());
+        return paperInfo;
+    }
+
+    /*
+     *
+     * @Description 根据 id 获取 brief paper info
+     * @Param [paperId, userId]
+     * @return sheep.paper.Entity.BriefPaperInfo
+     **/
+    private BriefPaperInfo _getBriefPaperInfoById(int paperId, int userId) {
+        Paper paper = _getMySqlInfoById(paperId);
+        Map<String, Object> responseMap = this._getEsInfoById(String.valueOf(paperId));
+        if (paper == null && responseMap==null) {
+            return null;
+        }
+        BriefPaperInfo paperInfo = _makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
+        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperId);
+        paperInfo.setFavored(favorite != null);
+        return paperInfo;
+    }
+
+    /*
+     *
+     * @Description 将字符串类型的 id 转为 int
+     * @Param [paperIdStr]
+     * @return int
+     **/
+    private int _paperIdParseStringToInt(String paperIdStr) {
+        int paperId;
+        try {
+            paperId = Integer.parseInt(paperIdStr);
+        } catch (Exception e) {
+            return -1;
+        }
+        return paperId;
+    }
+    // ==      以上为类内调用方法     ==
+
 
     /*
      *
@@ -94,10 +170,8 @@ public class PaperController {
      **/
     @GetMapping("/info/full/{paperIdStr}")
     public Object getFullInfoById(@PathVariable String paperIdStr) {
-        int paperId;
-        try {
-            paperId = Integer.parseInt(paperIdStr);
-        } catch (Exception e) {
+        int paperId = _paperIdParseStringToInt(paperIdStr);
+        if (paperId<0) {
             return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
         }
         Paper paper = this._getMySqlInfoById(paperId);
@@ -137,35 +211,14 @@ public class PaperController {
      **/
     @GetMapping("/info/brief/{paperIdStr}")
     public Object getBriefInfoById(@PathVariable String paperIdStr) {
-        int paperId;
-        try {
-            paperId = Integer.parseInt(paperIdStr);
-        } catch (Exception e) {
+        int paperId = _paperIdParseStringToInt(paperIdStr);
+        if (paperId<0) {
             return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
         }
-        Paper paper = this._getMySqlInfoById(paperId);
-        Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
-        if (paper == null && responseMap==null) {
-            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
-        }
-        BriefPaperInfo paperInfo = new BriefPaperInfo();
-        paperInfo.setPaperId(paperId);
-        paperInfo.setPaperTitle((String) responseMap.get("title"));
-        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
-        List<Author> authorList =  (List<Author>) responseMap.get("author");
-        List<String> authorNameList = new ArrayList<>();
-        for (Author author : authorList) {
-            authorNameList.add(author.getName());
-        }
-        paperInfo.setAuthorNames(authorNameList);
-        paperInfo.setDocType(paper.getDocType());
-        paperInfo.setLang(paper.getLang());
-        paperInfo.setPublisher(paper.getPublisher());
-        paperInfo.setPdfLink(paper.getPdfLink());
-        // TODO 获取userid？
-        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(0, paperId);
-        paperInfo.setFavored(favorite != null);
-        return ResultDTO.okOf(favorite);
+
+        // TODO 用户 id 如何获取？
+        BriefPaperInfo paperInfo = _getBriefPaperInfoById(paperId, 0);
+        return ResultDTO.okOf(paperInfo);
     }
 
     /*
@@ -193,24 +246,7 @@ public class PaperController {
         List<Favorite> result = paperService.getfavorites(ID);
         List<BriefPaperInfo> paperList = new ArrayList<>();
         for (Favorite favorite : result) {
-            int paperId = favorite.getPaperid();
-            Paper paper = this._getMySqlInfoById(paperId);
-            Map<String, Object> responseMap = this._getEsInfoById(String.valueOf(paperId));
-            BriefPaperInfo paperInfo = new BriefPaperInfo();
-            paperInfo.setPaperId(paperId);
-            paperInfo.setPaperTitle((String) responseMap.get("title"));
-            paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
-            List<Author> authorList =  (List<Author>) responseMap.get("author");
-            List<String> authorNameList = new ArrayList<>();
-            for (Author author : authorList) {
-                authorNameList.add(author.getName());
-            }
-            paperInfo.setAuthorNames(authorNameList);
-            paperInfo.setDocType(paper.getDocType());
-            paperInfo.setLang(paper.getLang());
-            paperInfo.setPublisher(paper.getPublisher());
-            paperInfo.setPdfLink(paper.getPdfLink());
-            paperInfo.setFavored(true);
+            BriefPaperInfo paperInfo = _getBriefPaperInfoById(favorite.getPaperid(), favorite.getUserid());
             paperList.add(paperInfo);
         }
         return ResultDTO.okOf(paperList);
@@ -224,10 +260,8 @@ public class PaperController {
      **/
     @GetMapping("/ref/{paperIdStr}")
     public Object gerRefString(@PathVariable String paperIdStr) {
-        int paperid;
-        try {
-            paperid = Integer.parseInt(paperIdStr);
-        } catch (Exception e) {
+        int paperid = _paperIdParseStringToInt(paperIdStr);
+        if (paperid<0) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
         Paper paper = _getMySqlInfoById(paperid);
