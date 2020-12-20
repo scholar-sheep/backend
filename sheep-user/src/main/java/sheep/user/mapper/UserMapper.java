@@ -60,8 +60,9 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select * from paper_info where paper_id = #{paperId} and info_id = #{infoId}")
     Paper getPaperById(int paperId,int infoId);
 
+    //12.20
     @Update("update mobileCode set code = #{code} where mobile = #{mobile}")
-    String updateUserCode(String mobile,String code);
+    int updateUserCode(String mobile,String code);
 
     @Select("select count(*) from mobileCode where mobile = #{mobile}")
     int getCodeByMobile(String mobile);
