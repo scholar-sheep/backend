@@ -17,8 +17,11 @@ public interface FollowMapper extends BaseMapper<Follow> {
     @Delete("delete from Follow where portal_id = #{portal_id} and user_id = #{user_id}")
     int unfollow(String portal_id, int user_id);
 
-    @Select("select COUNT(*) from  Follow where portal_id = #{portal_id}")
+    @Select("select COUNT(*) from Follow where portal_id = #{portal_id}")
     int followNum(String portal_id);
+
+    @Select("select COUNT(*) from Follow where portal_id = #{portal_id} and user_id = #{user_id}")
+    int isFollow(String portal_id, int user_id);
 
 
 }

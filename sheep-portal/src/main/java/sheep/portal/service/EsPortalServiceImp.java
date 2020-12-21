@@ -52,8 +52,8 @@ public class EsPortalServiceImp implements EsPortalService{
     @Override
     //删除失败返回2
     //成功返回1
-    public int deleteByID(String id)throws IOException{
-        DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar-test",id);
+    public int deleteByID(String id) throws IOException{
+        DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar",id);
         DeleteResponse deleteResponse = highLevelClient.delete(
                 deleteRequest, RequestOptions.DEFAULT);
         if (deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND) {
@@ -75,7 +75,7 @@ public class EsPortalServiceImp implements EsPortalService{
         if(esPortal.getN_citation() != 0) jsonMap.put("n_citation", esPortal.getN_citation());
         if(esPortal.getTags()!= null) jsonMap.put("tags_t", esPortal.getTags());
         //构建updateRequest
-        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar-test", "_doc", id);
+        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", id);
         updateRequest.doc(jsonMap);
         UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
         if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED)
@@ -87,10 +87,11 @@ public class EsPortalServiceImp implements EsPortalService{
 
     @Override
     public EsPortal getInformation(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar-test",id);
+        GetRequest getRequest = new GetRequest("sheep-scholar",id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
+        esPortal.setId(id);
         return esPortal;
     }
 
@@ -123,7 +124,7 @@ public class EsPortalServiceImp implements EsPortalService{
     }
     @Override
     public void setPaperList(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar-test", id);
+        GetRequest getRequest = new GetRequest("sheep-scholar", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);

@@ -1,1 +1,4 @@
 target
+test_env/es_data
+test_env/mysql_conf
+test_env/mysql_data
