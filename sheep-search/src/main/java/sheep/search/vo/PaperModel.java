@@ -18,6 +18,7 @@ public class PaperModel {
     private Venue venue;
     private int year;
     private int n_citation;
+    private List<String> url;
     @Data
     @AllArgsConstructor
     public static class Author
