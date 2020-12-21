@@ -16,7 +16,9 @@ public interface UserService {
 
         User getUserById(int ID);
         User getUserByName(String username);
-        int getUserByMobile(String mobile);
+        int getUserByMobile(String tel);
+
+        User getUserByTel(String mobile);
 
         int updateUserInfo(User user);
 

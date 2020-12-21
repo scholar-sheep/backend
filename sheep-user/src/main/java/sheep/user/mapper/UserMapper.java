@@ -36,6 +36,9 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select count(*) from user where mobile = #{mobile}")
     int getUserByMobile(String mobile);
 
+    @Select("select * from user where mobile = #{tel}")
+    User getUserByTel(String tel);
+
     @Insert("insert into follow(currentID,followID) values (#{currentID},#{followID})")
     int follow(int currentID,int followID);
 
