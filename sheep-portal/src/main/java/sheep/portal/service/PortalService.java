@@ -18,5 +18,5 @@ public interface PortalService {
     void follow(String portal_id, int user_id);
     void unfollow(String portal_id, int user_id);
     int isFollow(String portal_id, int user_id);
-
+    int followNum(String portal_id);
 }

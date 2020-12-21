@@ -49,6 +49,12 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    public User getUserByTel(String tel)
+    {
+        return userMapper.getUserByTel(tel);
+    }
+
+    @Override
     public int updateUserInfo(User user) {
         return userMapper.updateUserInfo(user);
     }

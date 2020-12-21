@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sheep.common.exception.ErrorType;
+import sheep.portal.pojo.PaperModel;
 import sheep.portal.util.*;
 import sheep.common.utils.ResultDTO;
 import sheep.portal.entity.EsPortal;
@@ -20,6 +21,7 @@ import sheep.portal.service.PortalService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class PortalController {
@@ -123,14 +125,13 @@ public class PortalController {
      * @return
      */
     @CrossOrigin
-    @RequestMapping(value = "/portal/", method = RequestMethod.GET)
-    public Object getInformation(@RequestParam(value = "page_num",required = false)Integer page_num,
-                                 @RequestParam(value = "sort",required = false) String sort,
+    @RequestMapping(value = "/portal", method = RequestMethod.GET)
+    public Object getInformation(@RequestParam(value = "sort",required = false) String sort,
                                  @RequestParam(value= "id")String id) {
         try{
             Portal portal = portalService.selectById(id);
             EsPortal esPortal = esPortalService.getInformation(id);
-            PaperList paperList=esPortalService.getPaperList(id,sort,page_num);
+            List<PaperModel> paperList = esPortalService.getPaperList(id, sort);
             WholePortal wholePortal = new WholePortal(portal, esPortal,paperList);
             return ResultDTO.okOf(wholePortal);
         }
@@ -186,7 +187,7 @@ public class PortalController {
      * @param paper_id
      * @return
      */
-    @GetMapping(value = "/portal/addPaper/")
+    @PostMapping(value = "/portal/addPaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object addPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
        try
@@ -207,7 +208,7 @@ public class PortalController {
      * @param paper_id
      * @return
      */
-    @DeleteMapping(value = "/portal/deletePaper/")
+    @DeleteMapping(value = "/portal/deletePaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object delPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
         try
@@ -226,10 +227,10 @@ public class PortalController {
      * @param portal_id
      * @return
      */
-    @PostMapping(value = "/portal/createPaper/")
+    @PostMapping(value = "/portal/createPaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam){
-        int result=esPortalService.createPaper(portal_id, paperParam);
+        int result = esPortalService.createPaper(portal_id, paperParam);
         if(result==1) return ResultDTO.okOf();
         else return ResultDTO.errorOf(ErrorType.CREATE_PAPER_ERROR); }
 
@@ -241,14 +242,13 @@ public class PortalController {
      */
     @RequestMapping(value = "/myPortal/", method = RequestMethod.GET)
     @LoginRequired
-    public Object getPortal(@RequestParam(required = false,value = "page_num")Integer page_num,
-                                 @RequestParam(required = false,value = "sort") String sort) {
+    public Object getPortal(@RequestParam(required = false,value = "sort") String sort) {
         try{
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
-            String portal_id=portalService.findPortalByUserId(user_id);
-            return this.getInformation(page_num,sort,portal_id);
+            String portal_id = portalService.findPortalByUserId(user_id);
+            return this.getInformation(sort,portal_id);
         }
         catch(NoPortalException noPortalException){
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
@@ -293,6 +293,17 @@ public class PortalController {
             return ResultDTO.errorOf(ErrorType.FOLLOW_ERROR);
         }
         return ResultDTO.okOf();
+    }
+
+    /**
+     * 用户取消关注学者
+     * @param portal_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/followNum", method = RequestMethod.GET)
+    @LoginRequired
+    public Object followNum(@RequestParam(value = "portal_id") String portal_id){
+        return ResultDTO.okOf(portalService.followNum(portal_id));
     }
 
     /**

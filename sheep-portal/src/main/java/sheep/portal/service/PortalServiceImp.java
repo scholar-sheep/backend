@@ -166,4 +166,13 @@ public class PortalServiceImp implements PortalService{
         else return count;
     }
 
+    /**
+     * 查询门户被关注次数
+     * @param portal_id
+     * @return
+     */
+    public int followNum(String portal_id){
+        return followMapper.followNum(portal_id);
+    }
+
 }
