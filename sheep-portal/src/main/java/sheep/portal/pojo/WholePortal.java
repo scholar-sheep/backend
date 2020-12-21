@@ -26,9 +26,9 @@ public class WholePortal<T>{
     //学者的学术成果被引用次数
     private int n_citation;
     private List<EsPortal.Tag> tags;
-    private PaperList<T> paperList;
+    private List<T> paperList;
 
-    public WholePortal(Portal mysql, EsPortal es,PaperList<T> paperList){
+    public WholePortal(Portal mysql, EsPortal es,List<T> paperList){
         this.portal_id = mysql.getId();
         this.name = mysql.getName();
         this.normalizedName = mysql.getNormalizedName();

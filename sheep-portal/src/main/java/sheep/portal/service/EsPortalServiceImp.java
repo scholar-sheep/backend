@@ -129,24 +129,18 @@ public class EsPortalServiceImp implements EsPortalService{
         }
 
     }
+
     @Override
-    public PaperList getPaperList(String id,String sort,Integer page_num) throws IOException
+    public List<PaperModel> getPaperList(String id, String sort) throws IOException
     {
-        if(page_num==null)page_num=1;
-        Long offset=Long.valueOf(page_num-1);
-        Long pageSize= Long.valueOf(1);
         //若redis中不存在则先存入
         if(!redisUtil.hasKey(id))
             this.setPaperList(id);
-        PaperList paperList=new PaperList();
-        List<PaperModel> list=(List)redisUtil.sort(id,id+"->",offset,pageSize,sort);
-        Long total=redisUtil.lGetListSize(id);
-        paperList.setResults(list);
-        paperList.setPageNum(page_num);
-        paperList.setTotal(total);
-        paperList.setTotalPages(total%pageSize==0?total/pageSize:total/pageSize+1);
-        return paperList;
+        PaperList paperList = new PaperList();
+        List<PaperModel> list = (List)redisUtil.sort(id, id+"->", sort);
+        return list;
     }
+
     @Override
     //失败添加返回0
     //成功添加返回1
@@ -182,6 +176,6 @@ public class EsPortalServiceImp implements EsPortalService{
     public int createPaper(String portal_id,PaperParam paperParam)
     {
         PaperModel newPaper= new PaperModel(paperParam);
-        return redisUtil.lSet(portal_id,newPaper)==true?1:0;
+        return redisUtil.lSet(portal_id, newPaper) == true ? 1 : 0;
     }
 }

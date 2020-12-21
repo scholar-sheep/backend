@@ -447,7 +447,7 @@ public class RedisUtil {
     }
 
     /**
-     * 通过索引 获取list中的值
+     * 通过索引获取list中的值
      *
      * @param key   键
      * @param index 索引  index>=0时， 0 表头，1 第二个元素，依次类推；index<0时，-1，表尾，-2倒数第二个元素，依次类推
@@ -581,17 +581,16 @@ public class RedisUtil {
      * @param count  每次查询的条数
      * @return 返回分页后的id列表
      */
-    public List<Object> sort(String key, String by_pattern, Long offset, Long count,String sort){
-        String[] sortSplit={"year","desc"};
-        if(sort!=null)
+    public List<Object> sort(String key, String by_pattern, String sort){
+        String[] sortSplit = {"year","desc"};
+        if(sort != null)
             sortSplit = sort.split("-");
         return redisTemplate.sort(
                 SortQueryBuilder
                         .sort(key)
-                        .by(by_pattern+sortSplit[0])
+                        .by(by_pattern + sortSplit[0])
                         .alphabetical(true)
                         .order(sortSplit[1].equalsIgnoreCase("asc") ?SortParameters.Order.ASC: SortParameters.Order.DESC)
-                        .limit(offset,count)
                         .build()
         );
     }
