@@ -9,7 +9,7 @@ public class Favorite {
     @GeneratedValue
     private int favoriteid;
     private int userid;
-    private int paperid;
+    private String paperid;
 
     public int getFavoriteid() {
         return favoriteid;
@@ -27,11 +27,11 @@ public class Favorite {
         this.userid = userid;
     }
 
-    public int getPaperid() {
+    public String getPaperid() {
         return paperid;
     }
 
-    public void setPaperid(int paperid) {
+    public void setPaperid(String paperid) {
         this.paperid = paperid;
     }
 

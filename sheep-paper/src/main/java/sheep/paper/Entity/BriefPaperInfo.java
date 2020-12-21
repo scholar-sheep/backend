@@ -3,21 +3,21 @@ package sheep.paper.Entity;
 import java.util.List;
 
 public class BriefPaperInfo {
-    private int paperId;
+    private String paperId;
     private String paperTitle;
     private List<String> authorNames;
     private String paperAbstract;
-    private int docType;
+    private String docType;
     private String lang;
     private String publisher;
     private String pdfLink;
     private boolean favored;
 
-    public int getPaperId() {
+    public String getPaperId() {
         return paperId;
     }
 
-    public void setPaperId(int paperId) {
+    public void setPaperId(String paperId) {
         this.paperId = paperId;
     }
 
@@ -45,11 +45,11 @@ public class BriefPaperInfo {
         this.paperAbstract = paperAbstract;
     }
 
-    public int getDocType() {
+    public String getDocType() {
         return docType;
     }
 
-    public void setDocType(int docType) {
+    public void setDocType(String docType) {
         this.docType = docType;
     }
 

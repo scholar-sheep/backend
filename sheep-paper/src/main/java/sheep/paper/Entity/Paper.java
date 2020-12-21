@@ -9,19 +9,18 @@ import java.util.List;
 public class Paper implements Serializable {
     @Id
     @Column(name = "paper_id")
-    private int paperId;
-    @Column(name = "paper_stat")
-    private int paperStat;
+    private String paperId;
+    @Column(name = "paper_start")
+    private String paperStart;
     @Column(name = "paper_end")
-    private int paperEnd;
+    private String paperEnd;
     @Column(name = "doc_type")
-    private int docType;
+    private String docType;
     private String lang;
     private String publisher;
-    private int volume;
-    private int issue;
+    private String volume;
+    private String issue;
     private String isbn;
-    private String doi;
     @Column(name = "pdf")
     private String pdfLink;
 
@@ -45,35 +44,35 @@ public class Paper implements Serializable {
     @Transient
     private int year;
 
-    public int getPaperId() {
+    public String getPaperId() {
         return paperId;
     }
 
-    public void setPaperId(int paperId) {
+    public void setPaperId(String paperId) {
         this.paperId = paperId;
     }
 
-    public int getPaperStat() {
-        return paperStat;
+    public String getPaperStart() {
+        return paperStart;
     }
 
-    public void setPaperStat(int paperStat) {
-        this.paperStat = paperStat;
+    public void setPaperStat(String paperStart) {
+        this.paperStart = paperStart;
     }
 
-    public int getPaperEnd() {
+    public String getPaperEnd() {
         return paperEnd;
     }
 
-    public void setPaperEnd(int paperEnd) {
+    public void setPaperEnd(String paperEnd) {
         this.paperEnd = paperEnd;
     }
 
-    public int getDocType() {
+    public String getDocType() {
         return docType;
     }
 
-    public void setDocType(int docType) {
+    public void setDocType(String docType) {
         this.docType = docType;
     }
 
@@ -93,19 +92,19 @@ public class Paper implements Serializable {
         this.publisher = publisher;
     }
 
-    public int getVolume() {
+    public String getVolume() {
         return volume;
     }
 
-    public void setVolume(int volume) {
+    public void setVolume(String volume) {
         this.volume = volume;
     }
 
-    public int getIssue() {
+    public String getIssue() {
         return issue;
     }
 
-    public void setIssue(int issue) {
+    public void setIssue(String issue) {
         this.issue = issue;
     }
 
@@ -115,14 +114,6 @@ public class Paper implements Serializable {
 
     public void setIsbn(String isbn) {
         this.isbn = isbn;
-    }
-
-    public String getDoi() {
-        return doi;
-    }
-
-    public void setDoi(String doi) {
-        this.doi = doi;
     }
 
     public String getPdfLink() {

@@ -7,6 +7,6 @@ import java.util.List;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
     List<Favorite> findFavoritesByUserid(int userid);
-    Favorite findFavoriteByUseridAndPaperid(int userid, int paperid);
+    Favorite findFavoriteByUseridAndPaperid(int userid, String paperIdStr);
 
 }

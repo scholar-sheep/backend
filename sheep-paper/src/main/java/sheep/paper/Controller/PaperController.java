@@ -38,8 +38,8 @@ public class PaperController {
      * @Param [paperId]
      * @return sheep.paper.Entity.Paper
      **/
-    private Paper _getMySqlInfoById(int paperId) {
-        return paperRepository.findPaperByPaperId(paperId);
+    private Paper _getMySqlInfoById(String paperIdStr) {
+        return paperRepository.findPaperByPaperId(paperIdStr);
     }
 
     /*
@@ -92,33 +92,18 @@ public class PaperController {
      * @Param [paperId, userId]
      * @return sheep.paper.Entity.BriefPaperInfo
      **/
-    private BriefPaperInfo _getBriefPaperInfoById(int paperId, int userId) {
-        Paper paper = _getMySqlInfoById(paperId);
-        Map<String, Object> responseMap = this._getEsInfoById(String.valueOf(paperId));
+    private BriefPaperInfo _getBriefPaperInfoById(String paperIdStr, int userId) {
+        Paper paper = _getMySqlInfoById(paperIdStr);
+        Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
         if (paper == null && responseMap==null) {
             return null;
         }
         BriefPaperInfo paperInfo = _makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
-        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperId);
+        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperIdStr);
         paperInfo.setFavored(favorite != null);
         return paperInfo;
     }
 
-    /*
-     *
-     * @Description 将字符串类型的 id 转为 int
-     * @Param [paperIdStr]
-     * @return int
-     **/
-    private int _paperIdParseStringToInt(String paperIdStr) {
-        int paperId;
-        try {
-            paperId = Integer.parseInt(paperIdStr);
-        } catch (Exception e) {
-            return -1;
-        }
-        return paperId;
-    }
     // ==      以上为类内调用方法     ==
 
 
@@ -130,13 +115,7 @@ public class PaperController {
      **/
     @GetMapping("/info/mysql/{paperIdStr}")
     public Object getMySqlInfoById(@PathVariable String paperIdStr) {
-        int paperId;
-        try {
-            paperId = Integer.parseInt(paperIdStr);
-        } catch (Exception e) {
-            return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
-        }
-        Paper paper = _getMySqlInfoById(paperId);
+        Paper paper = _getMySqlInfoById(paperIdStr);
         if (paper==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
@@ -170,11 +149,7 @@ public class PaperController {
      **/
     @GetMapping("/info/full/{paperIdStr}")
     public Object getFullInfoById(@PathVariable String paperIdStr) {
-        int paperId = _paperIdParseStringToInt(paperIdStr);
-        if (paperId<0) {
-            return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
-        }
-        Paper paper = this._getMySqlInfoById(paperId);
+        Paper paper = this._getMySqlInfoById(paperIdStr);
         Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
         if (paper == null && responseMap==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
@@ -209,13 +184,8 @@ public class PaperController {
      * @Param [paperIdStr]
      * @return java.lang.Object
      **/
-    @GetMapping("/info/brief/{paperIdStr}")
-    public Object getBriefInfoById(@PathVariable String paperIdStr) {
-        int paperId = _paperIdParseStringToInt(paperIdStr);
-        if (paperId<0) {
-            return ResultDTO.errorOf(ErrorType.PAPER_ID_ILLEGAL_ERROR);
-        }
-
+    @GetMapping("/info/brief/{paperId}")
+    public Object getBriefInfoById(@PathVariable String paperId) {
         // TODO 用户 id 如何获取？
         BriefPaperInfo paperInfo = _getBriefPaperInfoById(paperId, 0);
         return ResultDTO.okOf(paperInfo);
@@ -227,11 +197,11 @@ public class PaperController {
      * @Param [userId, paperId, infoId]
      * @return java.lang.Object
      **/
-    @PostMapping(value = "/collect")
-    public Object collect(int userId,int paperId){
+    @PostMapping(value = "/favor")
+    public Object collect(@RequestBody int userId, @RequestBody String paperId){
         Favorite favorite = paperService.favor(userId, paperId);
         if(favorite!=null)
-            return ResultDTO.okOf(favorite);
+            return ResultDTO.okOf(null);
         else return ResultDTO.errorOf(ErrorType.INSERT_ERROR);
     }
 
@@ -241,12 +211,18 @@ public class PaperController {
      * @Param [ID]
      * @return java.lang.Object
      **/
-    @RequestMapping(value = "/collect/{ID}",method = RequestMethod.GET)
+    @RequestMapping(value = "/favorlist/{ID}",method = RequestMethod.GET)
     public Object getCollect(@PathVariable("ID") int ID){
         List<Favorite> result = paperService.getfavorites(ID);
         List<BriefPaperInfo> paperList = new ArrayList<>();
         for (Favorite favorite : result) {
-            BriefPaperInfo paperInfo = _getBriefPaperInfoById(favorite.getPaperid(), favorite.getUserid());
+            Paper paper = _getMySqlInfoById(favorite.getPaperid());
+            Map<String, Object> responseMap = this._getEsInfoById(favorite.getPaperid());
+            if (paper == null && responseMap==null) {
+                continue;
+            }
+            BriefPaperInfo paperInfo = _makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
+            paperInfo.setFavored(true);
             paperList.add(paperInfo);
         }
         return ResultDTO.okOf(paperList);
@@ -260,12 +236,7 @@ public class PaperController {
      **/
     @GetMapping("/ref/{paperIdStr}")
     public Object gerRefString(@PathVariable String paperIdStr) {
-        int paperid = _paperIdParseStringToInt(paperIdStr);
-        if (paperid<0) {
-            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
-        }
-        Paper paper = _getMySqlInfoById(paperid);
-
+        Paper paper = _getMySqlInfoById(paperIdStr);
         Map map = _getEsInfoById(paperIdStr);
 
         if (map==null || paper==null) {
@@ -282,6 +253,7 @@ public class PaperController {
             String authorPart = sb.toString();
             String title = map.get("title").toString();
             String year = map.get("year").toString();
+            // TODO 实际类型的处理
             // 论文的类型编号暂时设计如下：
             // 0 - 期刊类 - J
             // 1 - 专著类 - M
@@ -292,61 +264,61 @@ public class PaperController {
             // 6 - 译注 - M
             // 7 - 其他 - Z
             // TODO 某些项为空的处理？
-            int type = paper.getDocType();
+            String type = paper.getDocType();
             switch (type) {
-                case 0: {
+                case "0": {
                     String venue = paper.getVenue();
-                    int volume = paper.getVolume();
-                    int issue = paper.getIssue();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String volume = paper.getVolume();
+                    String issue = paper.getIssue();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'J' + "]." + venue + '.' + year + '.'
                             + volume + '(' + issue + "):" + start + '-' + end + '.');
                 }
-                case 1:
-                case 6: {
+                case "1":
+                case "6": {
                     String venue = paper.getVenue();
                     String publisher = paper.getPublisher();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'M' + "]." + venue + ':' + publisher
                             + '.' + year + ':' + start + '-' + end + '.');
                 }
-                case 2: {
+                case "2": {
                     String publisher = paper.getPublisher();
-                    int issue = paper.getIssue();
+                    String issue = paper.getIssue();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'N' + "]." + publisher
                             + '.' + year + '(' + issue + ")" + '.');
                 }
-                case 3: {
+                case "3": {
                     String venue = paper.getVenue();
                     String publisher = paper.getPublisher();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'C' + "]." + venue + ':' + publisher
                             + '.' + year + ':' + start + '-' + end + '.');
                 }
-                case 4: {
+                case "4": {
                     String venue = paper.getVenue();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'D' + "]." + venue + ':'
                             + authors.get(0).get("name") + '.' + year + ':' + start + '-' + end + '.');
                 }
-                case 5: {
+                case "5": {
                     String venue = paper.getVenue();
                     String publisher = paper.getPublisher();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'R' + "]." + venue + ':' + publisher
                             + '.' + year + ':' + start + '-' + end + '.');
                 }
                 default: {
                     String venue = paper.getVenue();
-                    int volume = paper.getVolume();
-                    int issue = paper.getIssue();
-                    int start = paper.getPaperStat();
-                    int end = paper.getPaperEnd();
+                    String volume = paper.getVolume();
+                    String issue = paper.getIssue();
+                    String start = paper.getPaperStart();
+                    String end = paper.getPaperEnd();
                     return ResultDTO.okOf("[1]" + authorPart + title + '[' + 'Z' + "]." + venue + '.' + year + '.'
                             + volume + '(' + issue + "):" + start + '-' + end + '.');
                 }

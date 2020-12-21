@@ -10,6 +10,6 @@ import java.util.List;
 public interface PaperService {
     GetResponse getDetail(GetRequest getRequest) throws IOException;
 
-    Favorite favor(int userId, int paperId);
+    Favorite favor(int userId, String paperIdStr);
     List<Favorite> getfavorites(int ID);
 }

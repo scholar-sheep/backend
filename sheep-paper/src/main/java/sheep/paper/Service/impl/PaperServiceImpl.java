@@ -29,9 +29,9 @@ public class PaperServiceImpl implements PaperService {
     }
 
     @Override
-    public Favorite favor(int userId, int paperId) {
+    public Favorite favor(int userId, String paperIdStr) {
         Favorite favorite = new Favorite();
-        favorite.setPaperid(paperId);
+        favorite.setPaperid(paperIdStr);
         favorite.setUserid(userId);
         return favoriteRepository.saveAndFlush(favorite);
     }
