@@ -135,9 +135,11 @@ public class PortalController {
             return ResultDTO.okOf(wholePortal);
         }
         catch(NoPortalException noPortalException){
+            noPortalException.printStackTrace();
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
         catch(IOException e){
+            e.printStackTrace();
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
     }

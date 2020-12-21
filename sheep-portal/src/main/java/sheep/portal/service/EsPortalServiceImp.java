@@ -23,6 +23,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import sheep.portal.pojo.PaperList;
 import sheep.portal.pojo.PaperModel;
 
+import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.util.*;
 
@@ -52,7 +53,7 @@ public class EsPortalServiceImp implements EsPortalService{
     //删除失败返回2
     //成功返回1
     public int deleteByID(String id)throws IOException{
-        DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar",id);
+        DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar-test",id);
         DeleteResponse deleteResponse = highLevelClient.delete(
                 deleteRequest, RequestOptions.DEFAULT);
         if (deleteResponse.getResult() == DocWriteResponse.Result.NOT_FOUND) {
@@ -74,7 +75,7 @@ public class EsPortalServiceImp implements EsPortalService{
         if(esPortal.getN_citation() != 0) jsonMap.put("n_citation", esPortal.getN_citation());
         if(esPortal.getTags()!= null) jsonMap.put("tags_t", esPortal.getTags());
         //构建updateRequest
-        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", id);
+        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar-test", "_doc", id);
         updateRequest.doc(jsonMap);
         UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
         if (updateResponse.getResult() == DocWriteResponse.Result.UPDATED)
@@ -86,7 +87,7 @@ public class EsPortalServiceImp implements EsPortalService{
 
     @Override
     public EsPortal getInformation(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar",id);
+        GetRequest getRequest = new GetRequest("sheep-scholar-test",id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
@@ -95,26 +96,33 @@ public class EsPortalServiceImp implements EsPortalService{
 
 
     public PaperModel getPaperDetail(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-paper", id);
+        GetRequest getRequest = new GetRequest("sheep-paper-test", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         PaperModel paperModel= JSON.parseObject(sourceAsString, PaperModel.class);
         //扁平化作者列表
         StringBuilder sb=new StringBuilder();
+        if(paperModel!=null){
         List<PaperModel.Author> authors=paperModel.getAuthors();
         if(authors!=null) {
             for (PaperModel.Author author : authors) {
                 sb.append(author.getName());
                 sb.append(",");
             }
-            sb.deleteCharAt(sb.length() - 1);
+            if(sb.length()!=0)
+                sb.deleteCharAt(sb.length() - 1);
             paperModel.setAuthorNames(sb.toString());
         }
+        PaperModel.Venue venue=paperModel.getVenue();
+        if(venue!= null)
+        {
+            paperModel.setVenueName(venue.getRaw());
+        }}
         return paperModel;
     }
     @Override
     public void setPaperList(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar", id);
+        GetRequest getRequest = new GetRequest("sheep-scholar-test", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
