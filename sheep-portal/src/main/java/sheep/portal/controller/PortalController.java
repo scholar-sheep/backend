@@ -294,6 +294,17 @@ public class PortalController {
     }
 
     /**
+     * 用户取消关注学者
+     * @param portal_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/followNum", method = RequestMethod.GET)
+    @LoginRequired
+    public Object followNum(@RequestParam(value = "portal_id") String portal_id){
+        return ResultDTO.okOf(portalService.followNum(portal_id));
+    }
+
+    /**
      * 判断当前用户与该学者的关系
      * @param portal_id
      * @return 关注关系： ；认领关系： ；没关系：；
