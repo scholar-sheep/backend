@@ -114,6 +114,7 @@ public class EsPortalServiceImp implements EsPortalService{
             paperModel.setAuthorNames(sb.toString());
         }
         PaperModel.Venue venue=paperModel.getVenue();
+        //提取刊物名
         if(venue!= null)
         {
             paperModel.setVenueName(venue.getRaw());
