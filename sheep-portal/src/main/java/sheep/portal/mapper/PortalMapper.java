@@ -14,7 +14,7 @@ public interface PortalMapper extends BaseMapper<Portal>{
      * @param portal
      * @return
      */
-    @Insert("insert into portal(id,name, normalized_name, position, h_index) values (#{id},#{name}, #{normalizedName}, #{position}, #{hIndex})")
+    @Insert("insert into portal(id, name, normalized_name, position, h_index) values (#{id},#{name}, #{normalizedName}, #{position}, #{hIndex})")
     int addPortal(Portal portal);
 
 

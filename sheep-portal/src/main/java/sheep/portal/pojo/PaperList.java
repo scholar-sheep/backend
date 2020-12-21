@@ -17,7 +17,7 @@ public class PaperList<T> {
     /**
      * 总记录数
      */
-    private int total;
+    private Long total;
 
     /**
      * 总页码

@@ -3,9 +3,12 @@ package sheep.portal.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sheep.portal.entity.Follow;
 import sheep.portal.entity.PortalAndUser;
 import sheep.portal.exception.AdoptFailException;
+import sheep.portal.exception.FollowFailException;
 import sheep.portal.exception.NoPortalException;
+import sheep.portal.mapper.FollowMapper;
 import sheep.portal.mapper.PortalAndUserMapper;
 import sheep.portal.mapper.PortalMapper;
 import sheep.portal.entity.Portal;
@@ -17,6 +20,9 @@ public class PortalServiceImp implements PortalService{
 
     @Autowired
     PortalAndUserMapper portalAndUserMapper;
+
+    @Autowired
+    FollowMapper followMapper;
 
     /**
      * 创建门户，创建成功返回门户详情
@@ -102,6 +108,19 @@ public class PortalServiceImp implements PortalService{
         if(count != 1) throw new AdoptFailException();
         portalAndUserMapper.unadoptPortal(portal_id);
     }
+
+    /**
+     * 查询门户是否被用户认领
+     * @param portal_id
+     * @param user_id
+     * @return 0：没有被认领；1：被正常认领
+     */
+    public int isAdopt(String portal_id, int user_id){
+        int count = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("portal_id", portal_id).eq("user_id", user_id));
+        if(count == 0) return 0;
+        else return count;
+    }
+
     /**
      * 根据用户id查找门户id
      * @param user_id
@@ -111,6 +130,40 @@ public class PortalServiceImp implements PortalService{
         int count = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("user_id", user_id));
         if(count != 1) throw new NoPortalException();
       return portalAndUserMapper.findByUser_id(user_id);
+    }
+
+    /**
+     * 用户关注学者
+     * @param portal_id
+     * @param user_id
+     */
+    public void follow(String portal_id, int user_id){
+        if(isFollow(portal_id, user_id) != 0 || isAdopt(portal_id, user_id) != 0)
+            throw new FollowFailException();
+        followMapper.follow(portal_id, user_id);
+    }
+
+    /**
+     * 用户取消关注学者
+     * @param portal_id
+     * @param user_id
+     */
+    public void unfollow(String portal_id, int user_id){
+        if(isFollow(portal_id, user_id) != 1)
+            throw new FollowFailException();
+        followMapper.unfollow(portal_id, user_id);
+    }
+
+    /**
+     * 查询该用户是否已关注该学者
+     * @param portal_id
+     * @param user_id
+     * @return 0：没有关注；1：正常关注
+     */
+    public int isFollow(String portal_id, int user_id){
+        int count = followMapper.selectCount(new QueryWrapper<Follow>().eq("portal_id", portal_id).eq("user_id", user_id));
+        if(count == 0) return 0;
+        else return count;
     }
 
 }

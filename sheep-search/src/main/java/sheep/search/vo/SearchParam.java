@@ -19,7 +19,7 @@ public class SearchParam {
      */
     private String any ;
     /**
-     * 包含任意关键词
+     * 不包含关键词
      */
     private String exclude ;
     /**
@@ -50,6 +50,12 @@ public class SearchParam {
      * 页码
      */
     private Integer pageNum = 1;
+
+    /**
+     * 查询词出现位置
+     * 0 任何位置 1 仅标题
+     */
+    private Integer pos=0;
 
     /**
      * 原生的所有查询条件
