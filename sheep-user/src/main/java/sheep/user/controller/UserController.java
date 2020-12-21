@@ -43,7 +43,7 @@ public class UserController {
         else return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
     }
 
-    //注册 还差验证码
+    //注册
     @PostMapping("/register")
     public Object addUser(User user){
         User result1 = userService.getUserByName(user.getUsername());
@@ -68,8 +68,10 @@ public class UserController {
     }
 
     //获取验证码
-    @PostMapping("/code")
-    public Object getCode(@RequestParam("mobile") String mobile){
+    @PostMapping("/code/{mobile}")
+    public Object getCode(@PathVariable("mobile") String mobile){
+//        @PostMapping("/code")
+//        public Object getCode(@RequestParam("mobile") String mobile){
         //手机号重复
         int result = userService.getUserByMobile(mobile);
         if(result==0){
@@ -90,7 +92,7 @@ public class UserController {
     public Object getUserById(@PathVariable("ID") int ID){
         User result = userService.getUserById(ID);
         if(result!=null)
-            return userService.getUserById(ID);
+            return ResultDTO.okOf(userService.getUserById(ID));
         else return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
     }
 
@@ -115,7 +117,7 @@ public class UserController {
 
         int result = userService.updateUserInfo(user);
         if(result!=0)
-            return userService.getUserById(ID);
+            return ResultDTO.okOf(userService.getUserById(ID));
         else return ResultDTO.errorOf(ErrorType.UPDATE_ERROR);
     }
 

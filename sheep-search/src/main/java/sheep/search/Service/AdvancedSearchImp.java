@@ -1,41 +1,39 @@
 package sheep.search.Service;
 
-import org.apache.ibatis.jdbc.Null;
+import com.alibaba.fastjson.JSON;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.search.join.ScoreMode;
+import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.Operator;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.SearchService;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.nested.Nested;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedAggregationBuilder;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedLongTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
-import  com.carrotsearch.hppc.IntObjectHashMap;
-import org.redisson.api.RScoredSortedSet;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import sheep.search.config.EsConfig;
-import sheep.search.vo.*;
+import sheep.search.vo.PaperModel;
 import sheep.search.vo.SearchParam;
 import sheep.search.vo.SearchResult;
-import com.alibaba.fastjson.JSON;
-import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.index.query.*;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.springframework.util.StringUtils;
+
 import java.io.IOException;
 import java.util.*;
-import lombok.Data;
-import  java.util.List;
-import org.elasticsearch.search.sort.SortOrder;
+
 @Slf4j
 @Service
 public class AdvancedSearchImp implements SearchPaperService {
@@ -46,7 +44,7 @@ public class AdvancedSearchImp implements SearchPaperService {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    private int pagesize=1;
+    private int pagesize=10;
     @Override
     public SearchResult getSearchResult (SearchParam searchParam)
     {
@@ -78,7 +76,8 @@ public class AdvancedSearchImp implements SearchPaperService {
                         sb.append(author.getName());
                         sb.append(",");
                     }
-                    sb.deleteCharAt(sb.length() - 1);
+                    if(sb.length()!=0)
+                        sb.deleteCharAt(sb.length() - 1);
                     paperModel.setAuthorNames(sb.toString());
                 }
                 //设置高亮属性
@@ -93,8 +92,8 @@ public class AdvancedSearchImp implements SearchPaperService {
                 if(Abstract!=null){
                     String hiAbstract = Abstract.getFragments()[0].string();
                     paperModel.setAbstract(hiAbstract);}
-
-                HighlightField venue = hit.getHighlightFields().get("venue");
+                /*
+                HighlightField venue = hit.getHighlightFields().get("venue.raw");
                 if(venue!= null){
                     String hiVenue = venue.getFragments()[0].string();
                     paperModel.setVenue(hiVenue);}
@@ -103,7 +102,7 @@ public class AdvancedSearchImp implements SearchPaperService {
                 if(authorName!= null){
                     String hiName = authorName.getFragments()[0].string();
 
-                    }
+                    }*/
 
 
                 paperModels.add(paperModel);
@@ -188,8 +187,10 @@ public class AdvancedSearchImp implements SearchPaperService {
             if (!StringUtils.isEmpty(searchParam.getAll())) {
                 BoolQueryBuilder tmp = new BoolQueryBuilder();
                 boolQueryBuilder.must(
-                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAll(), "title", "abstract", "venue").operator(Operator.AND))
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAll(), "title", "abstract").operator(Operator.AND))
                                 .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getAll()).operator(Operator.AND), ScoreMode.Avg))
+                                .should(QueryBuilders.nestedQuery("venue", QueryBuilders.matchQuery("venue.raw", searchParam.getAll()).operator(Operator.AND), ScoreMode.Avg))
+                                .minimumShouldMatch(1)
                 );
             }
             //1.2 包含完整关键词
@@ -199,8 +200,8 @@ public class AdvancedSearchImp implements SearchPaperService {
                 boolQueryBuilder.must(
                         tmp.should(QueryBuilders.matchPhraseQuery("title", searchParam.getAccurate()))
                                 .should(QueryBuilders.matchPhraseQuery("abstract", searchParam.getAccurate()))
-                                .should(QueryBuilders.matchPhraseQuery("venue", searchParam.getAccurate()))
                                 .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchPhraseQuery("authors.name", searchParam.getAccurate()), ScoreMode.Avg))
+                                .should(QueryBuilders.nestedQuery("venue", QueryBuilders.matchPhraseQuery("venue.raw", searchParam.getAccurate()), ScoreMode.Avg))
                                 .minimumShouldMatch(1)
                 );
             }
@@ -208,23 +209,25 @@ public class AdvancedSearchImp implements SearchPaperService {
             if (!StringUtils.isEmpty(searchParam.getAny())) {
                 BoolQueryBuilder tmp = new BoolQueryBuilder();
                 boolQueryBuilder.must(
-                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAny(), "title", "abstract", "venue"))
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getAny(), "title", "abstract"))
                                 .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getAny()), ScoreMode.Avg))
+                                .should(QueryBuilders.nestedQuery("venue", QueryBuilders.matchQuery("venue.raw", searchParam.getAny()), ScoreMode.Avg))
                 );
             }
             //1.4 不含以下任意字词
             if (!StringUtils.isEmpty(searchParam.getExclude())) {
                 BoolQueryBuilder tmp = new BoolQueryBuilder();
                 boolQueryBuilder.mustNot(
-                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getExclude(), "title", "abstract", "venue"))
+                        tmp.should(QueryBuilders.multiMatchQuery(searchParam.getExclude(), "title", "abstract"))
                                 .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchQuery("authors.name", searchParam.getExclude()), ScoreMode.Avg))
+                                .should(QueryBuilders.nestedQuery("venue", QueryBuilders.matchQuery("venue.raw", searchParam.getExclude()), ScoreMode.Avg))
                 );
             }
         }
         //1.5指定刊物
         if(!StringUtils.isEmpty(searchParam.getVenue()))
         {
-            boolQueryBuilder.must(QueryBuilders.matchQuery("venue",searchParam.getVenue()));
+            boolQueryBuilder.must(QueryBuilders.nestedQuery("venue",QueryBuilders.matchQuery("venue.raw",searchParam.getVenue()),ScoreMode.Avg));
         }
         //1.6指定作者姓名
         if(!StringUtils.isEmpty(searchParam.getAuthor()))
@@ -267,7 +270,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field("title");
         highlightBuilder.field("abstract");
-        highlightBuilder.field("venue");
+        highlightBuilder.field("venue.raw");
         highlightBuilder.field("authors.name");
 
         highlightBuilder.preTags("<b style='color:red'>");
@@ -292,7 +295,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         searchSourceBuilder.aggregation(nested);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-paper-test"}, searchSourceBuilder);
         return request;
 
     }
