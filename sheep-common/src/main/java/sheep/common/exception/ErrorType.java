@@ -11,9 +11,11 @@ public enum ErrorType implements ErrorCode {
     DELETE_PAPER_ERROR(4006,"删除论文失败"),
     CREATE_PAPER_ERROR(4007,"创建论文失败"),
     FOLLOW_ERROR(4008, "关注失败"),
+    USER_ID_ILLEGAL_ERROR(4018, "用户信息有误"),
     PAPER_ID_ILLEGAL_ERROR(4019, "论文ID格式不合法"),
     PAPER_NOT_EXIST_ERROR(4020, "查询的论文不存在"),
-    INSERT_ERROR(4050, "写入数据失败");
+    FAVOR_ERROR(4050, "收藏失败"),
+    UNFAVOR_ERROR(4051, "取消收藏失败");
 
 
 

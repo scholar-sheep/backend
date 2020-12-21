@@ -6,7 +6,7 @@ import javax.persistence.*;
 @Table(name = "favorite")
 public class Favorite {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int favoriteid;
     private int userid;
     private String paperid;

@@ -10,10 +10,9 @@ import sheep.paper.Entity.Author;
 import sheep.paper.Entity.BriefPaperInfo;
 import sheep.paper.Entity.Favorite;
 import sheep.paper.Entity.Paper;
-import sheep.paper.Repository.FavoriteRepository;
-import sheep.paper.Repository.PaperRepository;
 import sheep.paper.Service.PaperService;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,90 +21,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/paper/basic")
 public class PaperController {
-    @Autowired
-    private PaperRepository paperRepository;
 
     @Autowired
     private PaperService paperService;
-
-    @Autowired
-    private FavoriteRepository favoriteRepository;
-
-    // ==      以下为类内调用方法     ==
-    /*
-     *
-     * @Description 在 MySQL 中查询论文信息，供类内调用
-     * @Param [paperId]
-     * @return sheep.paper.Entity.Paper
-     **/
-    private Paper _getMySqlInfoById(String paperIdStr) {
-        return paperRepository.findPaperByPaperId(paperIdStr);
-    }
-
-    /*
-     *
-     * @Description 在 Elastic Search 中查询论文信息，供类内调用
-     * @Param [paperIdStr]
-     * @return java.util.Map<java.lang.String,java.lang.Object>
-     **/
-    private Map<String, Object> _getEsInfoById(String paperIdStr) {
-        GetRequest getRequest = new GetRequest("paper", paperIdStr);
-        try {
-            GetResponse response = paperService.getDetail(getRequest);
-            return response.getSourceAsMap();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    /*
-     *
-     * @Description 构造 BriefPaperInfo 对象，不包含是否收藏的信息
-     * @Param [paper, responseMap]
-     * @return sheep.paper.Entity.BriefPaperInfo
-     **/
-    private BriefPaperInfo _makeUpBriefPaperInfoWithOutFavorInfo(Paper paper, Map<String, Object> responseMap) {
-        if (paper == null && responseMap==null) {
-            return null;
-        }
-        BriefPaperInfo paperInfo = new BriefPaperInfo();
-        paperInfo.setPaperId(paper.getPaperId());
-        paperInfo.setPaperTitle((String) responseMap.get("title"));
-        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
-        List<Author> authorList =  (List<Author>) responseMap.get("author");
-        List<String> authorNameList = new ArrayList<>();
-        for (Author author : authorList) {
-            authorNameList.add(author.getName());
-        }
-        paperInfo.setAuthorNames(authorNameList);
-        paperInfo.setDocType(paper.getDocType());
-        paperInfo.setLang(paper.getLang());
-        paperInfo.setPublisher(paper.getPublisher());
-        paperInfo.setPdfLink(paper.getPdfLink());
-        return paperInfo;
-    }
-
-    /*
-     *
-     * @Description 根据 id 获取 brief paper info
-     * @Param [paperId, userId]
-     * @return sheep.paper.Entity.BriefPaperInfo
-     **/
-    private BriefPaperInfo _getBriefPaperInfoById(String paperIdStr, int userId) {
-        Paper paper = _getMySqlInfoById(paperIdStr);
-        Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
-        if (paper == null && responseMap==null) {
-            return null;
-        }
-        BriefPaperInfo paperInfo = _makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
-        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperIdStr);
-        paperInfo.setFavored(favorite != null);
-        return paperInfo;
-    }
-
-    // ==      以上为类内调用方法     ==
-
 
     /*
      *
@@ -115,7 +33,7 @@ public class PaperController {
      **/
     @GetMapping("/info/mysql/{paperIdStr}")
     public Object getMySqlInfoById(@PathVariable String paperIdStr) {
-        Paper paper = _getMySqlInfoById(paperIdStr);
+        Paper paper = paperService.getMySqlInfoById(paperIdStr);
         if (paper==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
@@ -132,7 +50,7 @@ public class PaperController {
      **/
     @GetMapping("/info/es/{paperIdStr}")
     public Object getEsInfoById(@PathVariable String paperIdStr) {
-        Map map = _getEsInfoById(paperIdStr);
+        Map map = paperService.getEsInfoById(paperIdStr);
         if (map==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
@@ -149,8 +67,8 @@ public class PaperController {
      **/
     @GetMapping("/info/full/{paperIdStr}")
     public Object getFullInfoById(@PathVariable String paperIdStr) {
-        Paper paper = this._getMySqlInfoById(paperIdStr);
-        Map<String, Object> responseMap = this._getEsInfoById(paperIdStr);
+        Paper paper = paperService.getMySqlInfoById(paperIdStr);
+        Map<String, Object> responseMap = paperService.getEsInfoById(paperIdStr);
         if (paper == null && responseMap==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
@@ -185,9 +103,14 @@ public class PaperController {
      * @return java.lang.Object
      **/
     @GetMapping("/info/brief/{paperId}")
-    public Object getBriefInfoById(@PathVariable String paperId) {
-        // TODO 用户 id 如何获取？
-        BriefPaperInfo paperInfo = _getBriefPaperInfoById(paperId, 0);
+    public Object getBriefInfoById(@PathVariable String paperId, HttpServletRequest request) {
+        int userId;
+        try {
+            userId = Integer.parseInt(request.getHeader("X-UserId"));
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
+        }
+        BriefPaperInfo paperInfo = paperService.getBriefPaperInfoById(paperId, userId);
         return ResultDTO.okOf(paperInfo);
     }
 
@@ -198,11 +121,36 @@ public class PaperController {
      * @return java.lang.Object
      **/
     @PostMapping(value = "/favor")
-    public Object collect(@RequestBody int userId, @RequestBody String paperId){
-        Favorite favorite = paperService.favor(userId, paperId);
-        if(favorite!=null)
-            return ResultDTO.okOf(null);
-        else return ResultDTO.errorOf(ErrorType.INSERT_ERROR);
+    public Object collect(@RequestBody String paperId, HttpServletRequest request){
+        int userId;
+        try {
+            userId = Integer.parseInt(request.getHeader("X-UserId"));
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
+        }
+        if(paperService.favor(userId, paperId))
+            return ResultDTO.okOf();
+        else return ResultDTO.errorOf(ErrorType.FAVOR_ERROR);
+    }
+
+    /*
+     *
+     * @Description 取消收藏学术成果
+     * @Param [paperId]
+     * @return java.lang.Object
+     **/
+    @PostMapping(value = "/unfavor")
+    public Object undoCollect(@RequestBody String paperId, HttpServletRequest request) {
+        int userId;
+        try {
+            userId = Integer.parseInt(request.getHeader("X-UserId"));
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
+        }
+        if (paperService.unfavor(userId, paperId)) {
+            return ResultDTO.okOf();
+        }
+        return ResultDTO.errorOf(ErrorType.UNFAVOR_ERROR);
     }
 
     /*
@@ -216,12 +164,12 @@ public class PaperController {
         List<Favorite> result = paperService.getfavorites(ID);
         List<BriefPaperInfo> paperList = new ArrayList<>();
         for (Favorite favorite : result) {
-            Paper paper = _getMySqlInfoById(favorite.getPaperid());
-            Map<String, Object> responseMap = this._getEsInfoById(favorite.getPaperid());
+            Paper paper = paperService.getMySqlInfoById(favorite.getPaperid());
+            Map<String, Object> responseMap = paperService.getEsInfoById(favorite.getPaperid());
             if (paper == null && responseMap==null) {
                 continue;
             }
-            BriefPaperInfo paperInfo = _makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
+            BriefPaperInfo paperInfo = paperService.makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
             paperInfo.setFavored(true);
             paperList.add(paperInfo);
         }
@@ -236,8 +184,8 @@ public class PaperController {
      **/
     @GetMapping("/ref/{paperIdStr}")
     public Object gerRefString(@PathVariable String paperIdStr) {
-        Paper paper = _getMySqlInfoById(paperIdStr);
-        Map map = _getEsInfoById(paperIdStr);
+        Paper paper = paperService.getMySqlInfoById(paperIdStr);
+        Map map = paperService.getEsInfoById(paperIdStr);
 
         if (map==null || paper==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
