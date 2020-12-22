@@ -92,17 +92,20 @@ public class AdvancedSearchImp implements SearchPaperService {
                 if(Abstract!=null){
                     String hiAbstract = Abstract.getFragments()[0].string();
                     paperModel.setAbstract(hiAbstract);}
-                /*
+
                 HighlightField venue = hit.getHighlightFields().get("venue.raw");
                 if(venue!= null){
                     String hiVenue = venue.getFragments()[0].string();
-                    paperModel.setVenue(hiVenue);}
+                    System.out.println( venue.getFragments().length);
+
+                    //paperModel.setVenue(hiVenue);
+                }
 
                 HighlightField authorName = hit.getHighlightFields().get("authors.name");
                 if(authorName!= null){
                     String hiName = authorName.getFragments()[0].string();
 
-                    }*/
+                    }
 
 
                 paperModels.add(paperModel);
@@ -122,7 +125,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         //3.查询结果涉及的领域
         List <SearchResult.fieldVo> fieldVos=new ArrayList<>();
         Aggregations aggregations =searchResponse.getAggregations();
-        Terms fos=aggregations.get("by_fos");
+        Terms fos=aggregations.get("by_keywords");
         for(Terms.Bucket bucket:fos.getBuckets())
         {
                 String field=bucket.getKeyAsString();
@@ -130,7 +133,7 @@ public class AdvancedSearchImp implements SearchPaperService {
                 SearchResult.fieldVo fieldVo=new SearchResult.fieldVo(field,num);
                 fieldVos.add(fieldVo);
         }
-        result.setFileds(fieldVos);
+        result.setFields(fieldVos);
         //4.查询结果涉及的作者
         List <String> authorNames=new ArrayList<>();
         Aggregations Authoraggregations =searchResponse.getAggregations();
@@ -202,7 +205,7 @@ public class AdvancedSearchImp implements SearchPaperService {
                                 .should(QueryBuilders.matchPhraseQuery("abstract", searchParam.getAccurate()))
                                 .should(QueryBuilders.nestedQuery("authors", QueryBuilders.matchPhraseQuery("authors.name", searchParam.getAccurate()), ScoreMode.Avg))
                                 .should(QueryBuilders.nestedQuery("venue", QueryBuilders.matchPhraseQuery("venue.raw", searchParam.getAccurate()), ScoreMode.Avg))
-                                .minimumShouldMatch(1)
+                                //.minimumShouldMatch(1)
                 );
             }
             //1.3包含任意关键词
@@ -262,7 +265,15 @@ public class AdvancedSearchImp implements SearchPaperService {
         //1.8搜索结果按领域筛选
         if(!StringUtils.isEmpty(searchParam.getFos()))
         {
-            boolQueryBuilder.filter(QueryBuilders.termQuery("fos.raw",searchParam.getFos()));
+            String[] fos=searchParam.getFos().split(",");
+            //boolQueryBuilder.filter(QueryBuilders.termsQuery("keywords.raw",fos));
+
+            BoolQueryBuilder tmp = new BoolQueryBuilder();
+            for(int i=0;i<fos.length;i++)
+            {
+                tmp.must(QueryBuilders.termsQuery("keywords.raw",fos[i]));
+            }
+            boolQueryBuilder.must(tmp);
         }
         //bool query构建完成
         searchSourceBuilder.query(boolQueryBuilder);
@@ -286,16 +297,16 @@ public class AdvancedSearchImp implements SearchPaperService {
             searchSourceBuilder.sort(sortSplit[0], sortSplit[1].equalsIgnoreCase("asc") ? SortOrder.ASC : SortOrder.DESC);
         }
         //5.聚合
-        //5.1按照fos 聚合 指定返回前2条记录
-        TermsAggregationBuilder fosAgg = AggregationBuilders.terms("by_fos").field("fos.raw").size(2);
-        searchSourceBuilder.aggregation(fosAgg);
+        //5.1按照keywords 聚合 指定返回前2条记录
+        TermsAggregationBuilder keywordsAgg = AggregationBuilders.terms("by_keywords").field("keywords.raw").size(5);
+        searchSourceBuilder.aggregation(keywordsAgg);
         //5.2按照作者姓名聚合
         NestedAggregationBuilder nested = AggregationBuilders.nested("by_author", "authors");
-        nested.subAggregation(AggregationBuilders.terms("by_name").field("authors.name.raw").size(2));
+        nested.subAggregation(AggregationBuilders.terms("by_name").field("authors.name.raw").size(5));
         searchSourceBuilder.aggregation(nested);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-paper-test"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
         return request;
 
     }

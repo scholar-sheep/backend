@@ -25,7 +25,7 @@ public class SearchResult<T> {
     /**
      * 领域聚合
      */
-    private List<fieldVo> fileds;
+    private List<fieldVo> fields;
     /**
      * 作者聚合
      */
