@@ -138,6 +138,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             portalService.adoptPortal(portal_id, user_id);
         }
         catch(AdoptFailException adoptFailException){
@@ -213,6 +214,7 @@ public class PortalController {
     @PostMapping(value = "/portal/createPaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam){
+        System.out.println(paperParam);
         int result = esPortalService.createPaper(portal_id, paperParam);
         if(result == 1) return ResultDTO.okOf();
         else return ResultDTO.errorOf(ErrorType.CREATE_PAPER_ERROR);
@@ -250,6 +252,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 2;
             portalService.follow(portal_id, user_id);
         }
         catch(FollowFailException e){
@@ -270,6 +273,8 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+            System.out.println(portal_id);
+//            int user_id = 1;
             portalService.unfollow(portal_id, user_id);
         }
         catch (Exception e){
@@ -300,6 +305,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//        int user_id = 1;
         if(portalService.isAdopt(portal_id, user_id) == 1)
             return ResultDTO.okOf("认领关系");
         else if(portalService.isFollow(portal_id, user_id) == 1)
