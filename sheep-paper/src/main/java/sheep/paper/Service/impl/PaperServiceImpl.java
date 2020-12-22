@@ -7,14 +7,11 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import sheep.common.exception.ErrorType;
-import sheep.common.utils.ResultDTO;
 import sheep.paper.Entity.Author;
 import sheep.paper.Entity.BriefPaperInfo;
 import sheep.paper.Entity.Favorite;
 import sheep.paper.Entity.Paper;
 import sheep.paper.Repository.FavoriteRepository;
-import sheep.paper.Repository.PaperRepository;
 import sheep.paper.Service.PaperService;
 
 import java.io.IOException;
@@ -29,18 +26,11 @@ public class PaperServiceImpl implements PaperService {
     @Autowired
     RestHighLevelClient highLevelClient;
     @Autowired
-    PaperRepository paperRepository;
-    @Autowired
     FavoriteRepository favoriteRepository;
 
     @Override
     public GetResponse getDetailInfoInES(GetRequest getRequest) throws IOException {
         return highLevelClient.get(getRequest, RequestOptions.DEFAULT);
-    }
-
-    @Override
-    public Paper getMySqlInfoById(String paperIdStr) {
-        return paperRepository.findPaperByPaperId(paperIdStr);
     }
 
     @Override
@@ -55,13 +45,43 @@ public class PaperServiceImpl implements PaperService {
         }
     }
 
+    // TODO 这里是不是需要错误处理之类的（不合法数据
     @Override
-    public BriefPaperInfo makeUpBriefPaperInfoWithOutFavorInfo(Paper paper, Map<String, Object> responseMap) {
-        if (paper == null && responseMap==null) {
+    public Paper makeUpPaperInfoWithOutFavorInfo(Map<String, Object> responseMap, String paperIdStr) {
+        Paper paper = new Paper();
+        paper.setPaperId(paperIdStr);
+        paper.setTitle((String) responseMap.get("title"));
+        List<Map<String, Object>> authors = (List<Map<String, Object>>) responseMap.get("authors");
+        List<Author> authorList = new ArrayList<>();
+        for (Map map : authors) {
+            Author author = new Author();
+            author.setId((String) map.get("id"));
+            author.setName((String) map.get("name"));
+            author.setOrg((String) map.get("org"));
+            authorList.add(author);
+        }
+        paper.setAuthors(authorList);
+        paper.setVenue((String) responseMap.get("venue"));
+        paper.setYear((Integer) responseMap.get("year"));
+        List<String> keywords = (List<String>) responseMap.get("keywords");
+        paper.setKeywords(keywords);
+        paper.setnCitation((Integer) responseMap.get("n_citation"));
+        paper.setPublisher((String) responseMap.get("publisher"));
+        paper.setIsbn((String) responseMap.get("isbn"));
+        paper.setIssn((String) responseMap.get("issn"));
+        paper.setPdfLink((String) responseMap.get("pdf"));
+        paper.setUrl((List<String>) responseMap.get("url"));
+        paper.setPaperAbstract((String) responseMap.get("abstact"));
+        return paper;
+    }
+
+    @Override
+    public BriefPaperInfo makeUpBriefPaperInfoWithOutFavorInfo(Map<String, Object> responseMap, String paperIdStr) {
+        if (responseMap==null) {
             return null;
         }
         BriefPaperInfo paperInfo = new BriefPaperInfo();
-        paperInfo.setPaperId(paper.getPaperId());
+        paperInfo.setPaperId(paperIdStr);
         paperInfo.setPaperTitle((String) responseMap.get("title"));
         paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
         List<Author> authorList =  (List<Author>) responseMap.get("author");
@@ -70,23 +90,19 @@ public class PaperServiceImpl implements PaperService {
             authorNameList.add(author.getName());
         }
         paperInfo.setAuthorNames(authorNameList);
-        paperInfo.setDocType(paper.getDocType());
-        paperInfo.setLang(paper.getLang());
-        paperInfo.setPublisher(paper.getPublisher());
-        paperInfo.setPdfLink(paper.getPdfLink());
+        paperInfo.setPublisher((String) responseMap.get("publisher"));
+        paperInfo.setPdfLink((String) responseMap.get("pdf"));
         return paperInfo;
     }
 
     @Override
     public BriefPaperInfo getBriefPaperInfoById(String paperIdStr, int userId) {
-        Paper paper = getMySqlInfoById(paperIdStr);
         Map<String, Object> responseMap = getEsInfoById(paperIdStr);
-        if (paper == null && responseMap==null) {
+        if (responseMap==null) {
             return null;
         }
-        BriefPaperInfo paperInfo = makeUpBriefPaperInfoWithOutFavorInfo(paper, responseMap);
-        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperIdStr);
-        paperInfo.setFavored(favorite != null);
+        BriefPaperInfo paperInfo = makeUpBriefPaperInfoWithOutFavorInfo(responseMap, paperIdStr);
+        paperInfo.setFavored(checkFavor(userId, paperIdStr));
         return paperInfo;
     }
 
@@ -112,6 +128,11 @@ public class PaperServiceImpl implements PaperService {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public Boolean checkFavor(int userId, String paperIdStr) {
+        return favoriteRepository.existsByPaperidAndUserid(paperIdStr, userId);
     }
 
     @Override

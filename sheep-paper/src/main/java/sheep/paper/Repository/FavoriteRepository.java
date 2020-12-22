@@ -12,4 +12,6 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Integer> {
 
     void deleteFavoriteByFavoriteid(int favoriteid);
 
+    Boolean existsByPaperidAndUserid(String paperIdStr, int userId);
+
 }
