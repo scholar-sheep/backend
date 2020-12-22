@@ -45,7 +45,8 @@ public class UserController {
 
     //注册
     @PostMapping("/register")
-    public Object addUser(User user){
+    public Object addUser(@RequestBody User user){
+        System.out.println("register"+user);
         User result1 = userService.getUserByName(user.getUsername());
         //用户名重复
         if(result1!=null)
@@ -54,8 +55,8 @@ public class UserController {
         if(user.getMobile().length()!=11)
             return ResultDTO.errorOf(ErrorType.MOBILE_ERROR);
         //通过手机号去数据库找验证码
-        Object code = userService.getCodeByMobile(user.getMobile());
-        String codeSaved = (String) code;
+        String code = userService.getCodeSaved(user.getMobile());
+        String codeSaved = code;
         //userService.updateUserCode(user.getMobile(), );
         if(user.getCode().equals(codeSaved)){
             //对密码加密传输
@@ -98,7 +99,10 @@ public class UserController {
 
     //修改个人信息 username usertype必填
     @PutMapping(value = "/user/info/{ID}")
-    public Object updateUserInfo(@PathVariable("ID") int ID,User user){
+    public Object updateUserInfo(@PathVariable("ID") int ID,@RequestBody User user){
+        System.out.println(ID);
+        System.out.println(user);
+        System.out.println(user.getEmail());
         user.setID(ID);
         User origin = userService.getUserById(ID);
         if(user.getUsername()==null)
@@ -116,8 +120,12 @@ public class UserController {
             user.setNote(origin.getNote());
 
         int result = userService.updateUserInfo(user);
-        if(result!=0)
-            return ResultDTO.okOf(userService.getUserById(ID));
+        if(result!=0){
+            System.out.println("请求后"+userService.getUserById(ID).getEmail());
+            return ResultDTO.okOf(userService.updateUserInfo(user));
+        }
+//            return ResultDTO.okOf(userService.getUserById(ID));
+
         else return ResultDTO.errorOf(ErrorType.UPDATE_ERROR);
     }
 
@@ -126,9 +134,12 @@ public class UserController {
     public Object uploadAvatar(@RequestParam("avatar")MultipartFile file,@RequestParam("ID")int ID, HttpServletRequest request) throws IOException {
         //先查看用户是否存在
         User user = userService.getUserById(ID);
+        System.out.println("ID"+ID);
+        System.out.println("file"+file);
         if(user==null) return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
         //开始上传头像
         String path = ResourceUtils.getURL("classpath:").getPath() + "static/headImage/";
+        System.out.println("path"+path);
         String url = request.getContextPath() + "/headImage/";
         File filePath = new File(path);
         System.out.println("文件的保存路径：" + path);
@@ -140,9 +151,10 @@ public class UserController {
         String originalFileName = file.getOriginalFilename();
         //获取文件类型，以最后一个`.`为标识
         String type = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
-        HttpSession session = request.getSession();
-        String userId = Integer.toString((Integer)session.getAttribute("userId"));
-        String fileName = userId + "."+ type; // 新文件名，这里可以根据需要改名
+//        HttpSession session = request.getSession();
+//        String userId = Integer.toString((Integer)session.getAttribute("userId"));
+//        String fileName = userId + "."+ type; // 新文件名，这里可以根据需要改名
+        String fileName = ID + "." +type;
         //在指定路径下创建一个文件
         File targetFile = new File(path, fileName); // 未使用outputStream.write()的时候,是一个File对象,保存在内存中,硬盘中看不到,但是可以使用这个对象
         try{
@@ -154,7 +166,7 @@ public class UserController {
         String avatar = url+fileName;
         int i = userService.changeAvatar(ID,avatar);
         if (i != 0)
-            return ResultDTO.okOf();
+            return ResultDTO.okOf(avatar);
         else return ResultDTO.errorOf(ErrorType.UPDATE_ERROR);
     }
 

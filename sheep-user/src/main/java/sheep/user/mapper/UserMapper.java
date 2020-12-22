@@ -66,4 +66,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select count(*) from mobileCode where mobile = #{mobile}")
     int getCodeByMobile(String mobile);
+
+    @Select("select code from mobileCode where mobile = #{mobile}")
+    String getCodeSaved(String mobile);
 }

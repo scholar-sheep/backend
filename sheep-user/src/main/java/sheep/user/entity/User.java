@@ -31,8 +31,9 @@ public class User implements Serializable {   //分布式传输实体需要序�
     private String email;
     private String note;
     private String code;
-    private String github;
-    private String wechat;
+    private Date birthday;
+//    private String github;
+//    private String wechat;
     //private Date create_time;
     //private Date login_time;
 
