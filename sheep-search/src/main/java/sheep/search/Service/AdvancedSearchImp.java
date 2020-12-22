@@ -265,8 +265,15 @@ public class AdvancedSearchImp implements SearchPaperService {
         //1.8搜索结果按领域筛选
         if(!StringUtils.isEmpty(searchParam.getFos()))
         {
-            boolQueryBuilder.filter(QueryBuilders.termsQuery("keywords.raw",searchParam.getFos()));
-            //boolQueryBuilder.must(QueryBuilders.matchPhraseQuery("keywords.raw", searchParam.getAccurate()));
+            String[] fos=searchParam.getFos().split(",");
+            //boolQueryBuilder.filter(QueryBuilders.termsQuery("keywords.raw",fos));
+
+            BoolQueryBuilder tmp = new BoolQueryBuilder();
+            for(int i=0;i<fos.length;i++)
+            {
+                tmp.must(QueryBuilders.termsQuery("keywords.raw",fos[i]));
+            }
+            boolQueryBuilder.must(tmp);
         }
         //bool query构建完成
         searchSourceBuilder.query(boolQueryBuilder);
@@ -299,7 +306,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         searchSourceBuilder.aggregation(nested);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-paper-test"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
         return request;
 
     }
