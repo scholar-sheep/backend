@@ -79,17 +79,17 @@ public class PortalController {
         return ResultDTO.okOf();
     }
 
-
     /**
-     * 更新门户信息，返回更新后的信息
+     * 更新门户信息
      * @param esPortal
      * @return
      */
-    @RequestMapping(value="/portal/admin/", method = RequestMethod.PUT)
+    @RequestMapping(value="/portal/admin", method = RequestMethod.PUT)
     @LoginRequired
     @Permissions(role="isOwnerOrAdmin")
     public Object updatePortal(@RequestParam(value="portal_id") String id, @RequestBody EsPortal esPortal){
         try{
+            System.out.println(esPortal);
             //更新es部分
             esPortalService.update(id, esPortal);
         }
@@ -213,7 +213,7 @@ public class PortalController {
      */
     @PostMapping(value = "/portal/createPaper")
     @Permissions(role="isOwnerOrAdmin")
-    public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam){
+    public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam) throws IOException {
         System.out.println(paperParam);
         int result = esPortalService.createPaper(portal_id, paperParam);
         if(result == 1) return ResultDTO.okOf();
@@ -252,7 +252,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-//            int user_id = 2;
+//            int user_id = 3;
             portalService.follow(portal_id, user_id);
         }
         catch(FollowFailException e){
@@ -273,8 +273,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-            System.out.println(portal_id);
-//            int user_id = 1;
+//            int user_id = 2;
             portalService.unfollow(portal_id, user_id);
         }
         catch (Exception e){
@@ -305,7 +304,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-//        int user_id = 1;
+//        int user_id = 2;
         if(portalService.isAdopt(portal_id, user_id) == 1)
             return ResultDTO.okOf("认领关系");
         else if(portalService.isFollow(portal_id, user_id) == 1)

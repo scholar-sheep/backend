@@ -28,6 +28,6 @@ public interface EsPortalService {
     List<PaperModel> getPaperList(String id, String sort) throws IOException;
     int addPaper(String portal_id, String paper_id) throws IOException;
     int deletePaper(String portal_id,String paper_id) throws  IOException;
-    int createPaper(String portal_id,PaperParam paperParam)  ;
+    int createPaper(String portal_id,PaperParam paperParam) throws IOException;
 
 }
