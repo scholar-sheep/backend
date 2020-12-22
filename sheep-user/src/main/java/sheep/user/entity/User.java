@@ -22,7 +22,7 @@ import java.util.Date;
 public class User implements Serializable {   //分布式传输实体需要序列化
     @TableId(value = "ID", type = IdType.AUTO)
     private int ID;
-    private int sex;
+    private String sex;
     private String username;
     private int usertype;
     private String mobile;

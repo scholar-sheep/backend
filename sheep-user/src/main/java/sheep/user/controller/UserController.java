@@ -118,6 +118,10 @@ public class UserController {
             user.setEmail(origin.getEmail());
         if(user.getNote()==null)
             user.setNote(origin.getNote());
+        if(user.getBirthday()==null)
+            user.setBirthday(origin.getBirthday());
+        else
+            user.setBirthday((Date) user.getBirthday());
 
         int result = userService.updateUserInfo(user);
         if(result!=0){
