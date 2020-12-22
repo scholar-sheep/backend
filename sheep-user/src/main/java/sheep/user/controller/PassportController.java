@@ -3,6 +3,7 @@ package sheep.user.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sheep.user.entity.LoginResult;
 import sheep.user.entity.MyPasswordEncoder;
 import sheep.user.entity.User;
 import sheep.user.service.UserServiceImp;
@@ -23,35 +24,43 @@ public class PassportController {
     }
 
     @PostMapping("/passport/login")
-    public String login(
+    public Object login(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String loginType = request.getHeader("X-Forward-LoginType");
         User user = null;
-        if (loginType.equals("Username")) {
-            String username = request.getHeader("X-Forward-Username");
-            user = userService.getUserByName(username);
-        } else if (loginType.equals("Tel")) {
-            String phoneNumber = request.getHeader("X-Forward-Tel");
-            user = userService.getUserByTel(phoneNumber);
+        try {
+            String loginType = request.getHeader("X-Forward-LoginType");
+            if (loginType.equals("Username")) {
+                String username = request.getHeader("X-Forward-Username");
+                user = userService.getUserByName(username);
+            } else if (loginType.equals("Tel")) {
+                String phoneNumber = request.getHeader("X-Forward-Tel");
+                user = userService.getUserByTel(phoneNumber);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            return "required param not found";
         }
-        
+
         if (user == null) {
            response.setStatus(403);
-           return "";
+           return "login fail";
         }
-        
+
         String password = request.getHeader("X-Forward-Password");
 
         if (encoder.matches(password, user.getPassword())) {
-            String token = JwtUtil.generatorToken();
+            String token = JwtUtil.generatorToken(user.getID());
             response.setHeader("X-Token", token);
             response.setStatus(200);
+            LoginResult result = new LoginResult();
+            result.setToken(token);
+            result.setUserId(user.getID());
+            return result;
         } else {
             response.setStatus(403);
+            return "login fail";
         }
-
-        return "";
     }
 }
