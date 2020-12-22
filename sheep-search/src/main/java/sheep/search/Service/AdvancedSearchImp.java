@@ -306,7 +306,7 @@ public class AdvancedSearchImp implements SearchPaperService {
         searchSourceBuilder.aggregation(nested);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-paper-test"}, searchSourceBuilder);
         return request;
 
     }
