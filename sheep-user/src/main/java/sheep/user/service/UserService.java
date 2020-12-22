@@ -32,8 +32,9 @@ public interface UserService {
 
         String getCode(String mobile);
         String sendVerificationCodeSms(String mobile);
-        Object getCodeByMobile(String mobile);
+        int getCodeByMobile(String mobile);
         int updateUserCode(String mobile,String code);
+        String getCodeSaved(String mobile);
 
         int collect(int userId,int paperId,int infoId);
         List<UserCollect> getCollect(int ID);

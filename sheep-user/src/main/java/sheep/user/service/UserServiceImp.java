@@ -127,8 +127,13 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    public Object getCodeByMobile(String mobile) {
+    public int getCodeByMobile(String mobile) {
         return userMapper.getCodeByMobile(mobile);
+    }
+
+    @Override
+    public String getCodeSaved(String mobile){
+        return userMapper.getCodeSaved(mobile);
     }
 
     @Override

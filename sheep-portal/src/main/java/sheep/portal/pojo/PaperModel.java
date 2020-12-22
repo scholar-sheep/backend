@@ -32,13 +32,13 @@ public class PaperModel {
     }
     public PaperModel(PaperParam paperParam)
     {
-        this.id= UUID.randomUUID().toString();
-        this.title=paperParam.getTitle();
-        this.Abstract=paperParam.getAbstract();
-        this.venueName=paperParam.getVenue();
-        this.year=paperParam.getYear();
-        this.n_citation= paperParam.getN_citation();
-        this.authorNames=paperParam.getAuthors();
+        this.id = UUID.randomUUID().toString();
+        this.title = paperParam.getTitle();
+        this.Abstract = paperParam.getAbstract();
+        this.venueName = paperParam.getVenue();
+        this.year = paperParam.getYear();
+        this.n_citation = paperParam.getN_citation();
+        this.authorNames = paperParam.getAuthors();
     }
     @Data
     @NoArgsConstructor
