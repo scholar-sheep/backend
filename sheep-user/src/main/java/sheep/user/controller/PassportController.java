@@ -28,19 +28,24 @@ public class PassportController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String loginType = request.getHeader("X-Forward-LoginType");
         User user = null;
-        if (loginType.equals("Username")) {
-            String username = request.getHeader("X-Forward-Username");
-            user = userService.getUserByName(username);
-        } else if (loginType.equals("Tel")) {
-            String phoneNumber = request.getHeader("X-Forward-Tel");
-            user = userService.getUserByTel(phoneNumber);
+        try {
+            String loginType = request.getHeader("X-Forward-LoginType");
+            if (loginType.equals("Username")) {
+                String username = request.getHeader("X-Forward-Username");
+                user = userService.getUserByName(username);
+            } else if (loginType.equals("Tel")) {
+                String phoneNumber = request.getHeader("X-Forward-Tel");
+                user = userService.getUserByTel(phoneNumber);
+            }
+        } catch (Exception e) {
+            response.setStatus(500);
+            return "required param not found";
         }
 
         if (user == null) {
            response.setStatus(403);
-           return "";
+           return "login fail";
         }
 
         String password = request.getHeader("X-Forward-Password");
@@ -55,7 +60,7 @@ public class PassportController {
             return result;
         } else {
             response.setStatus(403);
-            return "";
+            return "login fail";
         }
     }
 }
