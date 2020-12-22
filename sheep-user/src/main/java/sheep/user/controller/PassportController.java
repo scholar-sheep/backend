@@ -46,7 +46,7 @@ public class PassportController {
         String password = request.getHeader("X-Forward-Password");
 
         if (encoder.matches(password, user.getPassword())) {
-            String token = JwtUtil.generatorToken();
+            String token = JwtUtil.generatorToken(user.getID());
             response.setHeader("X-Token", token);
             response.setStatus(200);
             LoginResult result = new LoginResult();
