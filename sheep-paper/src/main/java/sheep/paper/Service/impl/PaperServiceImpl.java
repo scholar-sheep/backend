@@ -35,7 +35,7 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public Map<String, Object> getEsInfoById(String paperIdStr) {
-        GetRequest getRequest = new GetRequest("paper", paperIdStr);
+        GetRequest getRequest = new GetRequest("sheep-paper", paperIdStr);
         try {
             GetResponse response = getDetailInfoInES(getRequest);
             return response.getSourceAsMap();
@@ -45,9 +45,11 @@ public class PaperServiceImpl implements PaperService {
         }
     }
 
-    // TODO 这里是不是需要错误处理之类的（不合法数据
     @Override
     public Paper makeUpPaperInfoWithOutFavorInfo(Map<String, Object> responseMap, String paperIdStr) {
+        if (responseMap==null) {
+            return null;
+        }
         Paper paper = new Paper();
         paper.setPaperId(paperIdStr);
         paper.setTitle((String) responseMap.get("title"));
@@ -61,11 +63,25 @@ public class PaperServiceImpl implements PaperService {
             authorList.add(author);
         }
         paper.setAuthors(authorList);
-        paper.setVenue((String) responseMap.get("venue"));
-        paper.setYear((Integer) responseMap.get("year"));
-        List<String> keywords = (List<String>) responseMap.get("keywords");
+        paper.setVenue((String) ((Map<String, Object>) responseMap.get("venue")).get("raw"));
+        try {
+            paper.setYear((Integer) responseMap.get("year"));
+        } catch (Exception e) {
+            ;
+        }
+        List<String> keywords;
+        try {
+            keywords = (List<String>) responseMap.get("keywords");
+        } catch (Exception e) {
+            keywords = new ArrayList<>();
+            keywords.add((String) responseMap.get("keywords"));
+        }
         paper.setKeywords(keywords);
-        paper.setnCitation((Integer) responseMap.get("n_citation"));
+        try {
+            paper.setnCitation((Integer) responseMap.get("n_citation"));
+        } catch (Exception e) {
+            ;
+        }
         paper.setPublisher((String) responseMap.get("publisher"));
         paper.setIsbn((String) responseMap.get("isbn"));
         paper.setIssn((String) responseMap.get("issn"));
@@ -84,11 +100,21 @@ public class PaperServiceImpl implements PaperService {
         paperInfo.setPaperId(paperIdStr);
         paperInfo.setPaperTitle((String) responseMap.get("title"));
         paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
-        List<Author> authorList =  (List<Author>) responseMap.get("author");
+
+        List<Map<String, Object>> authorList =  (List<Map<String, Object>>) responseMap.get("authors");
         List<String> authorNameList = new ArrayList<>();
-        for (Author author : authorList) {
-            authorNameList.add(author.getName());
+        for (Map author : authorList) {
+            String name;
+            try {
+                name = (String) author.get("name");
+            } catch (Exception e) {
+                continue;
+            }
+            if (name!=null) {
+                authorNameList.add(name);
+            }
         }
+
         paperInfo.setAuthorNames(authorNameList);
         paperInfo.setPublisher((String) responseMap.get("publisher"));
         paperInfo.setPdfLink((String) responseMap.get("pdf"));
@@ -108,6 +134,9 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public Boolean favor(int userId, String paperIdStr) {
+        if (checkFavor(userId, paperIdStr)) {
+            return false;
+        }
         Favorite favorite = new Favorite();
         favorite.setPaperid(paperIdStr);
         favorite.setUserid(userId);
@@ -121,12 +150,15 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public Boolean unfavor(int userId, String paperIdStr) {
-        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperIdStr);
-        try {
-            favoriteRepository.deleteFavoriteByFavoriteid(favorite.getFavoriteid());
-        } catch (Exception e) {
+        if (!checkFavor(userId, paperIdStr)) {
             return false;
         }
+        Favorite favorite = favoriteRepository.findFavoriteByUseridAndPaperid(userId, paperIdStr);
+//        try {
+            favoriteRepository.deleteByFavoriteid(favorite.getFavoriteid());
+//        } catch (Exception e) {
+//            return false;
+//        }
         return true;
     }
 
@@ -137,6 +169,6 @@ public class PaperServiceImpl implements PaperService {
 
     @Override
     public List<Favorite> getfavorites(int ID) {
-        return favoriteRepository.findFavoritesByUserid(ID);
+        return favoriteRepository.findAllByUserid(ID);
     }
 }

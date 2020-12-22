@@ -31,14 +31,14 @@ public class PaperController {
      * @Param [paperIdStr]
      * @return java.lang.Object
      **/
-    @GetMapping("/info/{paperIdStr}")
-    public Object getEsInfoById(@PathVariable String paperIdStr, HttpServletRequest request) {
+    @GetMapping("/info")
+    public Object getEsInfoById(@RequestParam String paperIdStr, HttpServletRequest request) {
         Map map = paperService.getEsInfoById(paperIdStr);
-        Paper paper = paperService.makeUpPaperInfoWithOutFavorInfo(map, paperIdStr);
         if (map==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
         else {
+            Paper paper = paperService.makeUpPaperInfoWithOutFavorInfo(map, paperIdStr);
             int userId = Integer.parseInt(request.getHeader("X-UserId"));
             paper.setFavored(paperService.checkFavor(userId, paperIdStr));
             return ResultDTO.okOf(paper);
@@ -51,8 +51,8 @@ public class PaperController {
      * @Param [paperIdStr]
      * @return java.lang.Object
      **/
-    @GetMapping("/info/brief/{paperId}")
-    public Object getBriefInfoById(@PathVariable String paperId, HttpServletRequest request) {
+    @GetMapping("/info/brief")
+    public Object getBriefInfoById(@RequestParam String paperId, HttpServletRequest request) {
         int userId;
         try {
             userId = Integer.parseInt(request.getHeader("X-UserId"));
@@ -60,6 +60,9 @@ public class PaperController {
             return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
         }
         BriefPaperInfo paperInfo = paperService.getBriefPaperInfoById(paperId, userId);
+        if (paperInfo==null) {
+            return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
+        }
         return ResultDTO.okOf(paperInfo);
     }
 
@@ -70,7 +73,7 @@ public class PaperController {
      * @return java.lang.Object
      **/
     @PostMapping(value = "/favor")
-    public Object collect(@RequestBody String paperId, HttpServletRequest request){
+    public Object collect(@RequestParam String paperId, HttpServletRequest request){
         int userId;
         try {
             userId = Integer.parseInt(request.getHeader("X-UserId"));
@@ -89,7 +92,7 @@ public class PaperController {
      * @return java.lang.Object
      **/
     @PostMapping(value = "/unfavor")
-    public Object undoCollect(@RequestBody String paperId, HttpServletRequest request) {
+    public Object undoCollect(@RequestParam String paperId, HttpServletRequest request) {
         int userId;
         try {
             userId = Integer.parseInt(request.getHeader("X-UserId"));
@@ -108,9 +111,15 @@ public class PaperController {
      * @Param [ID]
      * @return java.lang.Object
      **/
-    @RequestMapping(value = "/favorlist/{ID}",method = RequestMethod.GET)
-    public Object getCollect(@PathVariable("ID") int ID){
-        List<Favorite> result = paperService.getfavorites(ID);
+    @RequestMapping(value = "/favorlist",method = RequestMethod.GET)
+    public Object getCollect(HttpServletRequest request){
+        int userId;
+        try {
+            userId = Integer.parseInt(request.getHeader("X-UserId"));
+        } catch (Exception e) {
+            return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
+        }
+        List<Favorite> result = paperService.getfavorites(userId);
         List<BriefPaperInfo> paperList = new ArrayList<>();
         for (Favorite favorite : result) {
             Map<String, Object> responseMap = paperService.getEsInfoById(favorite.getPaperid());

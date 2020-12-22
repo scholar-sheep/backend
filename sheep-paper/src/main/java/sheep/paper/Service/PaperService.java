@@ -2,10 +2,12 @@ package sheep.paper.Service;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
+import org.springframework.data.jpa.repository.Modifying;
 import sheep.paper.Entity.BriefPaperInfo;
 import sheep.paper.Entity.Favorite;
 import sheep.paper.Entity.Paper;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
