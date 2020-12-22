@@ -83,6 +83,7 @@ public class SearchScholarImp implements SearchScholarService {
             result.setResults(scholarModels);
 
         }
+        /*
         //
         //封装分页信息
         //2.1 当前页码
@@ -93,7 +94,7 @@ public class SearchScholarImp implements SearchScholarService {
         //2.3 总页码
         Integer totalPages = (int) total % pagesize == 0 ?
                 (int) total / pagesize : (int) total / pagesize + 1;
-        result.setTotalPages(totalPages);
+        result.setTotalPages(totalPages);*/
         return result;
     }
 }
