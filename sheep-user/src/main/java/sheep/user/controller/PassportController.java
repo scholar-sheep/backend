@@ -3,6 +3,7 @@ package sheep.user.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
+import sheep.user.entity.LoginResult;
 import sheep.user.entity.MyPasswordEncoder;
 import sheep.user.entity.User;
 import sheep.user.service.UserServiceImp;
@@ -23,7 +24,7 @@ public class PassportController {
     }
 
     @PostMapping("/passport/login")
-    public String login(
+    public Object login(
             HttpServletRequest request,
             HttpServletResponse response
     ) {
@@ -36,22 +37,25 @@ public class PassportController {
             String phoneNumber = request.getHeader("X-Forward-Tel");
             user = userService.getUserByTel(phoneNumber);
         }
-        
+
         if (user == null) {
            response.setStatus(403);
            return "";
         }
-        
+
         String password = request.getHeader("X-Forward-Password");
 
         if (encoder.matches(password, user.getPassword())) {
             String token = JwtUtil.generatorToken();
             response.setHeader("X-Token", token);
             response.setStatus(200);
+            LoginResult result = new LoginResult();
+            result.setToken(token);
+            result.setUserId(user.getID());
+            return result;
         } else {
             response.setStatus(403);
+            return "";
         }
-
-        return "";
     }
 }
