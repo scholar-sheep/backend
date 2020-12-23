@@ -6,9 +6,37 @@ public class BriefPaperInfo {
     private String paperId;
     private String paperTitle;
     private List<String> authorNames;
-    private String paperAbstract;
-    private String publisher;
-    private String pdfLink;
+    private int nCitation;
+    private String venue;
+    private int year;
+
+    public int getnCitation() {
+        return nCitation;
+    }
+
+    public void setnCitation(int nCitation) {
+        this.nCitation = nCitation;
+    }
+
+    public String getVenue() {
+        return venue;
+    }
+
+    public void setVenue(String venue) {
+        this.venue = venue;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    //    private String paperAbstract;
+//    private String publisher;
+//    private String pdfLink;
     private boolean favored;
 
     public String getPaperId() {
@@ -35,29 +63,29 @@ public class BriefPaperInfo {
         this.authorNames = authorNames;
     }
 
-    public String getPaperAbstract() {
-        return paperAbstract;
-    }
+//    public String getPaperAbstract() {
+//        return paperAbstract;
+//    }
 
-    public void setPaperAbstract(String paperAbstract) {
-        this.paperAbstract = paperAbstract;
-    }
+//    public void setPaperAbstract(String paperAbstract) {
+//        this.paperAbstract = paperAbstract;
+//    }
 
-    public String getPublisher() {
-        return publisher;
-    }
+//    public String getPublisher() {
+//        return publisher;
+//    }
 
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
-    }
+//    public void setPublisher(String publisher) {
+//        this.publisher = publisher;
+//    }
 
-    public String getPdfLink() {
-        return pdfLink;
-    }
+//    public String getPdfLink() {
+//        return pdfLink;
+//    }
 
-    public void setPdfLink(String pdfLink) {
-        this.pdfLink = pdfLink;
-    }
+//    public void setPdfLink(String pdfLink) {
+//        this.pdfLink = pdfLink;
+//    }
 
     public boolean isFavored() {
         return favored;
