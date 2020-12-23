@@ -51,4 +51,17 @@ public class EsPortal {
         this.n_citation = wholePortal.getN_citation();
         this.tags=wholePortal.getTags();
     }
+
+    @Override
+    public String toString() {
+        return "EsPortal{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", org='" + org + '\'' +
+                ", n_pubs=" + n_pubs +
+                ", n_citation=" + n_citation +
+                ", tags=" + tags +
+                ", pubs=" + pubs +
+                '}';
+    }
 }

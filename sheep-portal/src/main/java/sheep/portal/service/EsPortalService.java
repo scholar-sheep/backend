@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import sheep.portal.entity.EsPortal;
 import sheep.portal.pojo.PaperList;
+import sheep.portal.pojo.PaperModel;
 import sheep.portal.pojo.PaperParam;
 
 import java.io.IOException;
@@ -24,9 +25,9 @@ public interface EsPortalService {
 
     EsPortal getInformation(String id) throws IOException;
     void setPaperList(String id) throws IOException;
-    PaperList getPaperList(String id,String sort,Integer page_num) throws IOException;
+    List<PaperModel> getPaperList(String id, String sort) throws IOException;
     int addPaper(String portal_id, String paper_id) throws IOException;
     int deletePaper(String portal_id,String paper_id) throws  IOException;
-    int createPaper(String portal_id,PaperParam paperParam)  ;
+    int createPaper(String portal_id,PaperParam paperParam) throws IOException;
 
 }

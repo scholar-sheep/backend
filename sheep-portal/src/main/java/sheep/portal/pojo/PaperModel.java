@@ -17,10 +17,11 @@ public class PaperModel {
     @JSONField(name = "abstract")
     private String Abstract;
     private List<Author> authors;
-    private String venue;
+    private Venue venue;
     private int year;
     private int n_citation;
     private String authorNames;
+    private String venueName;
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
@@ -31,13 +32,21 @@ public class PaperModel {
     }
     public PaperModel(PaperParam paperParam)
     {
-        this.id= UUID.randomUUID().toString();
-        this.title=paperParam.getTitle();
-        this.Abstract=paperParam.getAbstract();
-        this.venue=paperParam.getVenue();
-        this.year=paperParam.getYear();
-        this.n_citation= paperParam.getN_citation();
-        this.authorNames=paperParam.getAuthors();
+        this.id = UUID.randomUUID().toString();
+        this.title = paperParam.getTitle();
+        this.Abstract = paperParam.getAbstract();
+        this.venueName = paperParam.getVenue();
+        this.year = paperParam.getYear();
+        this.n_citation = paperParam.getN_citation();
+        this.authorNames = paperParam.getAuthors();
+    }
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Venue
+    {
+        private  String id;
+        private String raw;
     }
 
 }

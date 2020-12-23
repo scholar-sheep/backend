@@ -23,6 +23,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import sheep.portal.pojo.PaperList;
 import sheep.portal.pojo.PaperModel;
 
+import javax.validation.constraints.Null;
 import java.io.IOException;
 import java.util.*;
 
@@ -51,7 +52,7 @@ public class EsPortalServiceImp implements EsPortalService{
     @Override
     //删除失败返回2
     //成功返回1
-    public int deleteByID(String id)throws IOException{
+    public int deleteByID(String id) throws IOException{
         DeleteRequest deleteRequest = new DeleteRequest("sheep-scholar",id);
         DeleteResponse deleteResponse = highLevelClient.delete(
                 deleteRequest, RequestOptions.DEFAULT);
@@ -90,26 +91,35 @@ public class EsPortalServiceImp implements EsPortalService{
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
+        esPortal.setId(id);
         return esPortal;
     }
 
 
     public PaperModel getPaperDetail(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-paper", id);
+        GetRequest getRequest = new GetRequest("sheep-paper-test", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         PaperModel paperModel= JSON.parseObject(sourceAsString, PaperModel.class);
         //扁平化作者列表
         StringBuilder sb=new StringBuilder();
+        if(paperModel!=null){
         List<PaperModel.Author> authors=paperModel.getAuthors();
         if(authors!=null) {
             for (PaperModel.Author author : authors) {
                 sb.append(author.getName());
                 sb.append(",");
             }
-            sb.deleteCharAt(sb.length() - 1);
+            if(sb.length()!=0)
+                sb.deleteCharAt(sb.length() - 1);
             paperModel.setAuthorNames(sb.toString());
         }
+        PaperModel.Venue venue=paperModel.getVenue();
+        //提取刊物名
+        if(venue!= null)
+        {
+            paperModel.setVenueName(venue.getRaw());
+        }}
         return paperModel;
     }
     @Override
@@ -129,24 +139,18 @@ public class EsPortalServiceImp implements EsPortalService{
         }
 
     }
+
     @Override
-    public PaperList getPaperList(String id,String sort,Integer page_num) throws IOException
+    public List<PaperModel> getPaperList(String id, String sort) throws IOException
     {
-        if(page_num==null)page_num=1;
-        Long offset=Long.valueOf(page_num-1);
-        Long pageSize= Long.valueOf(1);
         //若redis中不存在则先存入
         if(!redisUtil.hasKey(id))
             this.setPaperList(id);
-        PaperList paperList=new PaperList();
-        List<PaperModel> list=(List)redisUtil.sort(id,id+"->",offset,pageSize,sort);
-        Long total=redisUtil.lGetListSize(id);
-        paperList.setResults(list);
-        paperList.setPageNum(page_num);
-        paperList.setTotal(total);
-        paperList.setTotalPages(total%pageSize==0?total/pageSize:total/pageSize+1);
-        return paperList;
+        PaperList paperList = new PaperList();
+        List<PaperModel> list = (List)redisUtil.sort(id, id+"->", sort);
+        return list;
     }
+
     @Override
     //失败添加返回0
     //成功添加返回1
@@ -162,6 +166,7 @@ public class EsPortalServiceImp implements EsPortalService{
                 return 2;
             }
         }
+        updateNpubs(1, portal_id);
         return redisUtil.lSet(portal_id,paperModel)==true?1:0;
     }
     @Override
@@ -173,15 +178,31 @@ public class EsPortalServiceImp implements EsPortalService{
         {
             PaperModel paper=(PaperModel)item;
             if(paper.getId().equals(paper_id)){
+                updateNpubs(-1, portal_id);
                 return redisUtil.lRemove(portal_id,0,item)>0?1:0;
             }
         }
         return 0;
     }
     @Override
-    public int createPaper(String portal_id,PaperParam paperParam)
-    {
+    public int createPaper(String portal_id,PaperParam paperParam) throws IOException {
         PaperModel newPaper= new PaperModel(paperParam);
-        return redisUtil.lSet(portal_id,newPaper)==true?1:0;
+        updateNpubs(1, portal_id);
+        return redisUtil.lSet(portal_id, newPaper) == true ? 1 : 0;
+    }
+
+    //在删除和增加论文时修改门户的n_pubs
+    public void updateNpubs(int num, String portal_id) throws IOException {
+        GetRequest getRequest = new GetRequest("sheep-scholar", portal_id);
+        GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
+        String sourceAsString = response.getSourceAsString();
+        EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
+        //构建改的hashmap
+        Map<String, Object> jsonMap = new HashMap<>();
+        jsonMap.put("n_pubs", esPortal.getN_pubs() + num);
+        //构建updateRequest
+        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", portal_id);
+        updateRequest.doc(jsonMap);
+        UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
     }
 }

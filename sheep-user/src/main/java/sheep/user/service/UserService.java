@@ -16,7 +16,9 @@ public interface UserService {
 
         User getUserById(int ID);
         User getUserByName(String username);
-        int getUserByMobile(String mobile);
+        int getUserByMobile(String tel);
+
+        User getUserByTel(String mobile);
 
         int updateUserInfo(User user);
 
@@ -30,8 +32,9 @@ public interface UserService {
 
         String getCode(String mobile);
         String sendVerificationCodeSms(String mobile);
-        Object getCodeByMobile(String mobile);
+        int getCodeByMobile(String mobile);
         int updateUserCode(String mobile,String code);
+        String getCodeSaved(String mobile);
 
         int collect(int userId,int paperId,int infoId);
         List<UserCollect> getCollect(int ID);

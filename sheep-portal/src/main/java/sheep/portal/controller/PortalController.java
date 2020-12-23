@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sheep.common.exception.ErrorType;
+import sheep.portal.exception.FollowFailException;
+import sheep.portal.pojo.PaperModel;
 import sheep.portal.util.*;
 import sheep.common.utils.ResultDTO;
 import sheep.portal.entity.EsPortal;
-import sheep.portal.entity.Portal;
-import sheep.portal.pojo.PaperList;
 import sheep.portal.pojo.PaperParam;
 import sheep.portal.pojo.WholePortal;
 import sheep.portal.exception.AdoptFailException;
@@ -20,6 +20,7 @@ import sheep.portal.service.PortalService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 public class PortalController {
@@ -36,23 +37,13 @@ public class PortalController {
      */
     @RequestMapping(value = "/portal/register", method = RequestMethod.POST)
     @LoginRequired
-    public Object register(@RequestBody WholePortal wholePortal) {
+    public Object register(@RequestBody EsPortal esPortal) {
         try{
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
-            //将wholeportal拆解到mysql里的portal和es里的esportal
-            Portal portal = new Portal(wholePortal);
-            EsPortal esPortal = new EsPortal(wholePortal);
-            //将mysql的插入数据
-            portalService.addPortal(user_id, portal);
-            //获取刚刚存储进mysql的自动生成的id
-            //String portal_id = portalService.getLastInsertUserID();
-            //mysql的portalAndUser表插入认领信息（自己创建默认认领）
-            portalService.adoptPortal(portal.getId(), user_id);
-            //将es里的插入数据
-            esPortal.setId(portal.getId());
             esPortalService.save(esPortal);
+            portalService.adoptPortal(esPortal.getId(), user_id);
         }
         catch(CreatePortalException createPortalException){
             return ResultDTO.errorOf(ErrorType.CREATE_PORTAL_ERROR);
@@ -62,20 +53,20 @@ public class PortalController {
         }
         return ResultDTO.okOf();
     }
+
     /**
      * 管理员删除门户
      * @param id
      * @return
      */
-    @RequestMapping(value = "/portal/admin/", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/portal/admin", method = RequestMethod.DELETE)
     @LoginRequired
     @Permissions(role="isAdmin")
-    public Object deletePortal(@RequestParam(value ="id")String id){
+    public Object deletePortal(@RequestParam(value ="id") String id){
         try{
-            //删除mysql里的信息
-            portalService.deleteById(id);
             //删除es里的信息
-            esPortalService.deleteByID(id);
+            System.out.println(esPortalService.deleteByID(id));
+
             //删除PortalAndUser表里的认领信息
             portalService.unadoptPortal(id);
         }
@@ -88,23 +79,17 @@ public class PortalController {
         return ResultDTO.okOf();
     }
 
-
     /**
-     * 更新门户信息，返回更新后的信息
-     * @param wholePortal
+     * 更新门户信息
+     * @param esPortal
      * @return
      */
-    @RequestMapping(value="/portal/admin/", method = RequestMethod.PUT)
+    @RequestMapping(value="/portal/admin", method = RequestMethod.PUT)
     @LoginRequired
     @Permissions(role="isOwnerOrAdmin")
-    public Object updatePortal(@RequestParam(value="portal_id") String id,@RequestBody WholePortal wholePortal){
+    public Object updatePortal(@RequestParam(value="portal_id") String id, @RequestBody EsPortal esPortal){
         try{
-            System.out.println(wholePortal.toString());
-            Portal portal = new Portal(wholePortal);
-            System.out.println(portal.getPosition());
-            EsPortal esPortal = new EsPortal(wholePortal);
-            //更新mysql部分
-            portalService.update(id, portal);
+            System.out.println(esPortal);
             //更新es部分
             esPortalService.update(id, esPortal);
         }
@@ -123,21 +108,21 @@ public class PortalController {
      * @return
      */
     @CrossOrigin
-    @RequestMapping(value = "/portal/", method = RequestMethod.GET)
-    public Object getInformation(@RequestParam(value = "page_num",required = false)Integer page_num,
-                                 @RequestParam(value = "sort",required = false) String sort,
-                                 @RequestParam(value= "id")String id) {
+    @RequestMapping(value = "/portal", method = RequestMethod.GET)
+    public Object getInformation(@RequestParam(value = "sort",required = false) String sort,
+                                 @RequestParam(value= "id") String id) {
         try{
-            Portal portal = portalService.selectById(id);
             EsPortal esPortal = esPortalService.getInformation(id);
-            PaperList paperList=esPortalService.getPaperList(id,sort,page_num);
-            WholePortal wholePortal = new WholePortal(portal, esPortal,paperList);
+            List<PaperModel> paperList = esPortalService.getPaperList(id, sort);
+            WholePortal wholePortal = new WholePortal(esPortal,paperList);
             return ResultDTO.okOf(wholePortal);
         }
         catch(NoPortalException noPortalException){
+            noPortalException.printStackTrace();
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
         catch(IOException e){
+            e.printStackTrace();
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
     }
@@ -146,7 +131,6 @@ public class PortalController {
      * 认领门户，路径参数为门户id，查询参数为当前user_id
      * @return
      */
-
     @RequestMapping(value = "/portal/apply", method = RequestMethod.POST)
     @LoginRequired
     public Object adoptPortal(@RequestParam(value = "portal_id") String portal_id){
@@ -154,6 +138,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             portalService.adoptPortal(portal_id, user_id);
         }
         catch(AdoptFailException adoptFailException){
@@ -184,7 +169,7 @@ public class PortalController {
      * @param paper_id
      * @return
      */
-    @GetMapping(value = "/portal/addPaper/")
+    @PostMapping(value = "/portal/addPaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object addPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
        try
@@ -199,19 +184,20 @@ public class PortalController {
            return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
        }
     }
+
     /**
      * 删除论文，路径参数为门户id 查询参数为论文id
      * @param portal_id
      * @param paper_id
      * @return
      */
-    @DeleteMapping(value = "/portal/deletePaper/")
+    @DeleteMapping(value = "/portal/deletePaper")
     @Permissions(role="isOwnerOrAdmin")
     public Object delPaper(@RequestParam(value="portal_id") String portal_id,@RequestParam(value="paper_id") String paper_id) {
         try
         {
-            int result=esPortalService.deletePaper(portal_id, paper_id);
-            if(result==1) return ResultDTO.okOf();
+            int result = esPortalService.deletePaper(portal_id, paper_id);
+            if(result == 1) return ResultDTO.okOf();
             else return ResultDTO.errorOf(ErrorType.DELETE_PAPER_ERROR);
         }
         catch(IOException e)
@@ -219,18 +205,20 @@ public class PortalController {
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
     }
+
     /**
      * 创建论文
      * @param portal_id
      * @return
      */
-    @PostMapping(value = "/portal/createPaper/")
+    @PostMapping(value = "/portal/createPaper")
     @Permissions(role="isOwnerOrAdmin")
-    public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam){
-        int result=esPortalService.createPaper(portal_id, paperParam);
-        if(result==1) return ResultDTO.okOf();
-        else return ResultDTO.errorOf(ErrorType.CREATE_PAPER_ERROR); }
-
+    public Object createPaper(@RequestParam(value="portal_id") String portal_id, @RequestBody PaperParam paperParam) throws IOException {
+        System.out.println(paperParam);
+        int result = esPortalService.createPaper(portal_id, paperParam);
+        if(result == 1) return ResultDTO.okOf();
+        else return ResultDTO.errorOf(ErrorType.CREATE_PAPER_ERROR);
+    }
 
     /**
      * 查看我的门户
@@ -239,14 +227,13 @@ public class PortalController {
      */
     @RequestMapping(value = "/myPortal/", method = RequestMethod.GET)
     @LoginRequired
-    public Object getPortal(@RequestParam(required = false,value = "page_num")Integer page_num,
-                                 @RequestParam(required = false,value = "sort") String sort) {
+    public Object getPortal(@RequestParam(required = false,value = "sort") String sort) {
         try{
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
-            String portal_id=portalService.findPortalByUserId(user_id);
-            return this.getInformation(page_num,sort,portal_id);
+            String portal_id = portalService.findPortalByUserId(user_id);
+            return this.getInformation(sort,portal_id);
         }
         catch(NoPortalException noPortalException){
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
@@ -265,9 +252,10 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 3;
             portalService.follow(portal_id, user_id);
         }
-        catch(Exception e){
+        catch(FollowFailException e){
             return ResultDTO.errorOf(ErrorType.FOLLOW_ERROR);
         }
         return ResultDTO.okOf();
@@ -285,12 +273,24 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 2;
             portalService.unfollow(portal_id, user_id);
         }
         catch (Exception e){
             return ResultDTO.errorOf(ErrorType.FOLLOW_ERROR);
         }
         return ResultDTO.okOf();
+    }
+
+    /**
+     * 查询门户被关注数
+     * @param portal_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/followNum", method = RequestMethod.GET)
+    @LoginRequired
+    public Object followNum(@RequestParam(value = "portal_id") String portal_id){
+        return ResultDTO.okOf(portalService.followNum(portal_id));
     }
 
     /**
@@ -304,12 +304,32 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//        int user_id = 2;
         if(portalService.isAdopt(portal_id, user_id) == 1)
             return ResultDTO.okOf("认领关系");
         else if(portalService.isFollow(portal_id, user_id) == 1)
             return ResultDTO.okOf("关注关系");
         else
             return ResultDTO.okOf("没关系");
+    }
+
+    /**
+     * 查询当前用户是否已经有门户了
+     * @return
+     */
+    @RequestMapping(value = "/portal/hasPortalOrNot", method = RequestMethod.GET)
+    @LoginRequired
+    public Object findPortalByUserId(){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+        try{
+            String portal_id = portalService.findPortalByUserId(user_id);
+            return ResultDTO.okOf(portal_id);
+        }
+        catch (NoPortalException e){
+            return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+        }
     }
 
 }

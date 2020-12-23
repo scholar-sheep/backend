@@ -24,7 +24,7 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("select * from user where ID = #{ID}")
     User getUserById(int ID);
 
-    @Update("update user set username = #{username},usertype = #{usertype},mobile = #{mobile},password = #{password},email = #{email},note = #{note} where ID = #{ID}")
+    @Update("update user set username = #{username},usertype = #{usertype},mobile = #{mobile},password = #{password},email = #{email},note = #{note},sex = #{sex},birthday = #{birthday} where ID = #{ID}")
     int updateUserInfo(User user);
 
     @Insert("insert into user(username,password,mobile) values (#{username},#{password},#{mobile})")
@@ -35,6 +35,9 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select count(*) from user where mobile = #{mobile}")
     int getUserByMobile(String mobile);
+
+    @Select("select * from user where mobile = #{tel}")
+    User getUserByTel(String tel);
 
     @Insert("insert into follow(currentID,followID) values (#{currentID},#{followID})")
     int follow(int currentID,int followID);
@@ -66,4 +69,7 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select count(*) from mobileCode where mobile = #{mobile}")
     int getCodeByMobile(String mobile);
+
+    @Select("select code from mobileCode where mobile = #{mobile}")
+    String getCodeSaved(String mobile);
 }

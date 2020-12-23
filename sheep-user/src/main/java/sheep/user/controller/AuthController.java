@@ -21,7 +21,7 @@ public class AuthController {
         }
 
         if (JwtUtil.verifyToken(token)) {
-            response.setHeader("X-UserId", JwtUtil.parseUserId(token));
+            response.setHeader("X-UserId", String.valueOf(JwtUtil.parseUserId(token)));
         }
     }
 }

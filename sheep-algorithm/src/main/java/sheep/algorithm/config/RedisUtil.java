@@ -1,13 +1,12 @@
-package sheep.portal.util;
+package sheep.algorithm.config;
 
 
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.query.SortQueryBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.data.redis.core.query.SortQueryBuilder;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,7 +35,7 @@ public class RedisUtil {
     public boolean expire(String key, long time) {
         try {
             if (time > 0) {
-                redisTemplate.expire(key, time, TimeUnit.SECONDS);
+                redisTemplate.expire(key, time, TimeUnit.DAYS);
             }
             return true;
         } catch (Exception e) {
