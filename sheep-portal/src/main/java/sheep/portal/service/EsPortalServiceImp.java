@@ -97,7 +97,7 @@ public class EsPortalServiceImp implements EsPortalService{
 
 
     public PaperModel getPaperDetail(String id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-paper-test", id);
+        GetRequest getRequest = new GetRequest("sheep-paper", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
         PaperModel paperModel= JSON.parseObject(sourceAsString, PaperModel.class);

@@ -43,6 +43,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id=Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             esPortalService.save(esPortal);
             portalService.adoptPortal(esPortal.getId(), user_id);
         }
