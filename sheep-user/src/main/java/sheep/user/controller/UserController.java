@@ -109,9 +109,9 @@ public class UserController {
             user.setUsertype(origin.getUsertype());
         if(user.getMobile()==null)
             user.setMobile(origin.getMobile());
-        if(user.getPassword()==null)
-            user.setPassword(origin.getPassword());
-        else user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
+//        if(user.getPassword()==null)
+//            user.setPassword(origin.getPassword());
+//        else user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
         if(user.getEmail()==null)
             user.setEmail(origin.getEmail());
         if(user.getNote()==null)
@@ -125,13 +125,20 @@ public class UserController {
             user.setBirthday(calendar.getTime());
         }
 
-        int result = userService.updateUserInfo(user);
+        int result;
+        if(user.getPassword().equals(origin.getPassword())){
+            result = userService.updateUserInfo(user);
+        }
+        else {
+            user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
+            result = userService.updateUserPassword(ID,user.getPassword());
+            userService.updateUserInfo(user);
+        }
+
         if(result!=0){
             System.out.println("请求后"+userService.getUserById(ID).getBirthday());
-            return ResultDTO.okOf(userService.updateUserInfo(user));
+            return ResultDTO.okOf(result);
         }
-//            return ResultDTO.okOf(userService.getUserById(ID));
-
         else return ResultDTO.errorOf(ErrorType.UPDATE_ERROR);
     }
 
