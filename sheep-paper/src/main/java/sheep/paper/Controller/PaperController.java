@@ -20,6 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/paper/basic")
+@CrossOrigin
 public class PaperController {
 
     @Autowired
@@ -39,7 +40,12 @@ public class PaperController {
         }
         else {
             Paper paper = paperService.makeUpPaperInfoWithOutFavorInfo(map, paperIdStr);
-            int userId = Integer.parseInt(request.getHeader("X-UserId"));
+            int userId;
+            try {
+                userId = Integer.parseInt(request.getHeader("X-UserId"));
+            } catch (Exception e) {
+                return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
+            }
             paper.setFavored(paperService.checkFavor(userId, paperIdStr));
             return ResultDTO.okOf(paper);
         }
