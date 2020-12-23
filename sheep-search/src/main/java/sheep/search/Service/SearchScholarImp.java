@@ -31,7 +31,7 @@ public class SearchScholarImp implements SearchScholarService {
     @Autowired
     private RedisTemplate redisTemplate;
 
-    private int pagesize = 1;
+    private int pagesize = 10;
 
     @Override
     public SearchResult getSearchResult(ScholarParam searchParam) {
@@ -60,10 +60,10 @@ public class SearchScholarImp implements SearchScholarService {
         //bool query构建完成
         searchSourceBuilder.query(boolQueryBuilder);
 
-
+        /*
         //2.分页
         searchSourceBuilder.from((searchParam.getPageNum() - 1) * pagesize);
-        searchSourceBuilder.size(pagesize);
+        searchSourceBuilder.size(pagesize);*/
 
         //sheep-paper是要查询的索引
         SearchRequest request = new SearchRequest(new String[]{"sheep-scholar"}, searchSourceBuilder);
