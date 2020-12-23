@@ -229,7 +229,7 @@ public class PortalController {
      * @return
      */
     @RequestMapping(value = "/myPortal/", method = RequestMethod.GET)
-//    @LoginRequired
+    @LoginRequired
     public Object getPortal(@RequestParam(required = false,value = "sort") String sort) {
         try{
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
