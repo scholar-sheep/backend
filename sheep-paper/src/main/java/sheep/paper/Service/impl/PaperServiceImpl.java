@@ -99,7 +99,7 @@ public class PaperServiceImpl implements PaperService {
         BriefPaperInfo paperInfo = new BriefPaperInfo();
         paperInfo.setPaperId(paperIdStr);
         paperInfo.setPaperTitle((String) responseMap.get("title"));
-        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
+//        paperInfo.setPaperAbstract((String) responseMap.get("abstract"));
 
         List<Map<String, Object>> authorList =  (List<Map<String, Object>>) responseMap.get("authors");
         List<String> authorNameList = new ArrayList<>();
@@ -110,14 +110,26 @@ public class PaperServiceImpl implements PaperService {
             } catch (Exception e) {
                 continue;
             }
-            if (name!=null) {
+            if (name!=null && !name.equals("")) {
                 authorNameList.add(name);
             }
         }
-
-        paperInfo.setAuthorNames(authorNameList);
-        paperInfo.setPublisher((String) responseMap.get("publisher"));
-        paperInfo.setPdfLink((String) responseMap.get("pdf"));
+        if (authorList.size()!=0) {
+            paperInfo.setAuthorNames(authorNameList);
+        }
+//        paperInfo.setPublisher((String) responseMap.get("publisher"));
+//        paperInfo.setPdfLink((String) responseMap.get("pdf"));
+        paperInfo.setVenue((String) ((Map<String, Object>) responseMap.get("venue")).get("raw"));
+        try {
+            paperInfo.setnCitation((Integer) responseMap.get("n_citation"));
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setYear((Integer) responseMap.get("year"));
+        } catch (Exception e) {
+            ;
+        }
         return paperInfo;
     }
 
