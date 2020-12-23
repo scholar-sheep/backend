@@ -68,7 +68,7 @@ public class PortalServiceImp implements PortalService{
     {
         int count = portalAndUserMapper.selectCount(new QueryWrapper<PortalAndUser>().eq("user_id", user_id));
         if(count != 1) throw new NoPortalException();
-      return portalAndUserMapper.findByUser_id(user_id);
+        return portalAndUserMapper.findByUser_id(user_id);
     }
 
     /**

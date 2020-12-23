@@ -13,6 +13,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sheep.algorithm.config.RedisUtil;
+import sheep.algorithm.pojo.NetworkResult;
 import sheep.algorithm.pojo.Scholar;
 import sheep.algorithm.config.Client;
 
@@ -28,12 +29,13 @@ public class RelationNetwork {
     public  String scholarIndex = "sheep-scholar", paperIndex = "sheep-paper";
     @Autowired
     RedisUtil redisUtil;
-    public  ArrayList<ArrayList> generateNetwork(String scholarId){
+    public NetworkResult generateNetwork(String scholarId){
         RestHighLevelClient client = Client.getClient();
 
         ArrayList<RelationLine> relationLines = new ArrayList<>();
         ArrayList<RelationNode> relationNodes = new ArrayList<>();
-        ArrayList<ArrayList> result = new ArrayList<>();
+        NetworkResult result=new NetworkResult();
+        //ArrayList<ArrayList> result = new ArrayList<>();
         int[] a = {2, 3};
         ArrayList<String> relationResult1 = new ArrayList<>(), relationResult2 = new ArrayList<>();
         relationResult1.add(scholarId);
@@ -54,9 +56,9 @@ public class RelationNetwork {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        result.add(relationLines);
-        result.add(relationNodes);
+        if(relationLines!=null&&relationNodes!=null){
+        result.setNodes(relationNodes);
+        result.setLines(relationLines);}
         return result;
 
     }
@@ -131,12 +133,12 @@ public class RelationNetwork {
         return ids;
     }
 
-    public ArrayList<ArrayList> getNetwork(String id) throws IOException
+    public NetworkResult getNetwork(String id) throws IOException
     {
         //若redis中不存在则先存入
         if(!redisUtil.hasKey("network"+id))
             redisUtil.set("network"+id,this.generateNetwork(id),15);
-       return (ArrayList<ArrayList>)redisUtil.get("network"+id);
+       return (NetworkResult)redisUtil.get("network"+id);
     }
 }
 
