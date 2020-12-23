@@ -20,6 +20,7 @@ public class AlogrithmController {
     @GetMapping(value = {"/network"})
     public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
         ArrayList<ArrayList> network = relationNetwork.getNetwork(portal_id);
+       // ArrayList<ArrayList> network= relationNetwork.generateNetwork(portal_id);
         return ResultDTO.okOf(network);
     }
 }

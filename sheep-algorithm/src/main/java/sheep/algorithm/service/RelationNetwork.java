@@ -108,8 +108,9 @@ public class RelationNetwork {
                 }
                 System.out.println(jsonObject);
             }
-
-            relationNodes.add(new RelationNode(sourceScholar));
+            RelationNode sourceNode=new RelationNode(sourceScholar);
+            if(!relationNodes.contains(sourceNode))
+                relationNodes.add(sourceNode);
             for(Scholar targetScholar : scholars){
                 RelationNode tnode = new RelationNode(targetScholar);
                 RelationLine tline = new RelationLine(sourceScholar, targetScholar);
