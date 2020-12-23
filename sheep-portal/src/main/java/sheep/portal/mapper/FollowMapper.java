@@ -6,7 +6,10 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
+import sheep.portal.entity.EsPortal;
 import sheep.portal.entity.Follow;
+
+import java.util.List;
 
 @Mapper
 @Repository
@@ -23,5 +26,6 @@ public interface FollowMapper extends BaseMapper<Follow> {
     @Select("select COUNT(*) from Follow where portal_id = #{portal_id} and user_id = #{user_id}")
     int isFollow(String portal_id, int user_id);
 
-
+    @Select("select portal_id from Follow where user_id = #{user_id}")
+    List<String> followList(int user_id);
 }

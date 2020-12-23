@@ -63,91 +63,72 @@ public class AdvancedSearchImp implements SearchPaperService {
         SearchResult result = new SearchResult();
         SearchHits hits = searchResponse.getHits();
         //1. 封装查询到的论文信息
-        if (hits.getHits()!=null&&hits.getHits().length>0){
+        if (hits.getHits()!=null&&hits.getHits().length>0) {
             List<PaperModel> paperModels = new ArrayList<>();
             for (SearchHit hit : hits) {
                 String sourceAsString = hit.getSourceAsString();
                 PaperModel paperModel = JSON.parseObject(sourceAsString, PaperModel.class);
-                //扁平化作者列表
-                StringBuilder sb=new StringBuilder();
-                List<PaperModel.Author> authors=paperModel.getAuthors();
-                if(authors!=null) {
-                    for (PaperModel.Author author : authors) {
-                        sb.append(author.getName());
-                        sb.append(",");
-                    }
-                    if(sb.length()!=0)
-                        sb.deleteCharAt(sb.length() - 1);
-                    paperModel.setAuthorNames(sb.toString());
-                }
+
                 //设置高亮属性
-                //获得经过高亮处理的字符
                 HighlightField title = hit.getHighlightFields().get("title");
-                if(title!=null){
+                if (title != null) {
                     String hiTitle = title.getFragments()[0].string();
                     //替换成经高亮处理的字符串
-                    paperModel.setTitle(hiTitle);}
-
-                HighlightField Abstract = hit.getHighlightFields().get("abstract");
-                if(Abstract!=null){
-                    String hiAbstract = Abstract.getFragments()[0].string();
-                    paperModel.setAbstract(hiAbstract);}
-
-                HighlightField venue = hit.getHighlightFields().get("venue.raw");
-                if(venue!= null){
-                    String hiVenue = venue.getFragments()[0].string();
-                    System.out.println( venue.getFragments().length);
-
-                    //paperModel.setVenue(hiVenue);
+                    paperModel.setTitle(hiTitle);
                 }
 
-                HighlightField authorName = hit.getHighlightFields().get("authors.name");
-                if(authorName!= null){
-                    String hiName = authorName.getFragments()[0].string();
-
-                    }
-
+                HighlightField Abstract = hit.getHighlightFields().get("abstract");
+                if (Abstract != null) {
+                    String hiAbstract = Abstract.getFragments()[0].string();
+                    paperModel.setAbstract(hiAbstract);
+                }
 
                 paperModels.add(paperModel);
             }
+
             result.setResults(paperModels);
-        }
-        //封装分页信息
-        //2.1 当前页码
-        result.setPageNum(searchParam.getPageNum());
-        //2.2 总记录数
-        long total = hits.getTotalHits().value;
-        result.setTotal(total);
-        //2.3 总页码
-        Integer totalPages = (int)total % pagesize == 0 ?
-                (int)total / pagesize : (int)total / pagesize + 1;
-        result.setTotalPages(totalPages);
-        //3.查询结果涉及的领域
-        List <SearchResult.fieldVo> fieldVos=new ArrayList<>();
-        Aggregations aggregations =searchResponse.getAggregations();
-        Terms fos=aggregations.get("by_keywords");
-        for(Terms.Bucket bucket:fos.getBuckets())
-        {
+
+            //封装分页信息
+            //2.1 当前页码
+            result.setPageNum(searchParam.getPageNum());
+            //2.2 总记录数
+            long total = hits.getTotalHits().value;
+            result.setTotal(total);
+            //2.3 总页码
+            Integer totalPages = (int) total % pagesize == 0 ?
+                    (int) total / pagesize : (int) total / pagesize + 1;
+            result.setTotalPages(totalPages);
+            /*
+            //3.查询结果涉及的领域
+            List <SearchResult.fieldVo> fieldVos=new ArrayList<>();
+            Aggregations aggregations =searchResponse.getAggregations();
+            Terms fos=aggregations.get("by_keywords");
+            for(Terms.Bucket bucket:fos.getBuckets())
+            {
                 String field=bucket.getKeyAsString();
                 Long num=bucket.getDocCount();
                 SearchResult.fieldVo fieldVo=new SearchResult.fieldVo(field,num);
                 fieldVos.add(fieldVo);
-        }
-        result.setFields(fieldVos);
-        //4.查询结果涉及的作者
-        List <String> authorNames=new ArrayList<>();
-        Aggregations Authoraggregations =searchResponse.getAggregations();
-        Nested authors=Authoraggregations.get("by_author");
-        Terms names= authors.getAggregations().get("by_name");
+            }
+            result.setFields(fieldVos);
+            //4.查询结果涉及的作者
+            List <String> authorNames=new ArrayList<>();
+            Aggregations Authoraggregations =searchResponse.getAggregations();
+            Nested authors=Authoraggregations.get("by_author");
+            Terms names= authors.getAggregations().get("by_name");
 
-        for(Terms.Bucket bucket:names.getBuckets())
-        {
-            String name=bucket.getKeyAsString();
-            authorNames.add(name);
+            for(Terms.Bucket bucket:names.getBuckets())
+            {
+                String name=bucket.getKeyAsString();
+                authorNames.add(name);
+            }
+            result.setAuthorNames(authorNames);*/
         }
-        result.setAuthorNames(authorNames);
-        return result;
-    }
+            return result;
+        }
+
+
+
     private SearchRequest bulidSearchRequest(SearchParam searchParam) {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         //1. 构建bool query
@@ -277,16 +258,17 @@ public class AdvancedSearchImp implements SearchPaperService {
         }
         //bool query构建完成
         searchSourceBuilder.query(boolQueryBuilder);
+
         //2.highlight
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field("title");
         highlightBuilder.field("abstract");
-        highlightBuilder.field("venue.raw");
-        highlightBuilder.field("authors.name");
+
 
         highlightBuilder.preTags("<b style='color:red'>");
         highlightBuilder.postTags("</b>");
         searchSourceBuilder.highlighter(highlightBuilder);
+
 
         //3.分页
         searchSourceBuilder.from((searchParam.getPageNum() - 1) *pagesize);
@@ -296,6 +278,7 @@ public class AdvancedSearchImp implements SearchPaperService {
             String[] sortSplit = searchParam.getSort().split("-");
             searchSourceBuilder.sort(sortSplit[0], sortSplit[1].equalsIgnoreCase("asc") ? SortOrder.ASC : SortOrder.DESC);
         }
+        /*
         //5.聚合
         //5.1按照keywords 聚合 指定返回前2条记录
         TermsAggregationBuilder keywordsAgg = AggregationBuilders.terms("by_keywords").field("keywords.raw").size(5);
@@ -303,10 +286,10 @@ public class AdvancedSearchImp implements SearchPaperService {
         //5.2按照作者姓名聚合
         NestedAggregationBuilder nested = AggregationBuilders.nested("by_author", "authors");
         nested.subAggregation(AggregationBuilders.terms("by_name").field("authors.name.raw").size(5));
-        searchSourceBuilder.aggregation(nested);
+        searchSourceBuilder.aggregation(nested);*/
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-paper-test"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
         return request;
 
     }
