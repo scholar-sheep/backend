@@ -100,9 +100,7 @@ public class UserController {
     //修改个人信息 username usertype必填
     @PutMapping(value = "/user/info/{ID}")
     public Object updateUserInfo(@PathVariable("ID") int ID,@RequestBody User user){
-        System.out.println(ID);
         System.out.println(user);
-        System.out.println(user.getEmail());
         user.setID(ID);
         User origin = userService.getUserById(ID);
         if(user.getUsername()==null)
@@ -120,12 +118,16 @@ public class UserController {
             user.setNote(origin.getNote());
         if(user.getBirthday()==null)
             user.setBirthday(origin.getBirthday());
-        else
-            user.setBirthday((Date) user.getBirthday());
+        else{
+            Calendar calendar = new GregorianCalendar();
+            calendar.setTime(user.getBirthday());
+            calendar.add(Calendar.DATE,1);
+            user.setBirthday(calendar.getTime());
+        }
 
         int result = userService.updateUserInfo(user);
         if(result!=0){
-            System.out.println("请求后"+userService.getUserById(ID).getEmail());
+            System.out.println("请求后"+userService.getUserById(ID).getBirthday());
             return ResultDTO.okOf(userService.updateUserInfo(user));
         }
 //            return ResultDTO.okOf(userService.getUserById(ID));

@@ -4,84 +4,36 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
 
-@Entity
-@Table(name = "paper_info")
 public class Paper implements Serializable {
-    @Id
-    @Column(name = "paper_id")
     private String paperId;
-    @Column(name = "paper_start")
-    private String paperStart;
-    @Column(name = "paper_end")
-    private String paperEnd;
-    @Column(name = "doc_type")
-    private String docType;
-    private String lang;
-    private String publisher;
-    private String volume;
-    private String issue;
-    private String isbn;
-    @Column(name = "pdf")
-    private String pdfLink;
-
-//    Data in ElasticSearch
-    @Transient
-    private String paperAbstract;
-    @Transient
-    private List<Author> authors;
-    @Transient
-    private String fieldOfStudy;
-    @Transient
-    private List<String> keywords;
-    @Transient
-    private int nCitation;
-    @Transient
     private String title;
-    @Transient
-    private String url;
-    @Transient
+    private List<Author> authors;
     private String venue;
-    @Transient
     private int year;
+    private List<String> keywords;
+    private int nCitation;
+    private String publisher;
+    private String isbn;
+    private String issn;
+    private String pdfLink;
+    private List<String> url;
+    private String paperAbstract;
+    private Boolean favored;
 
     public String getPaperId() {
         return paperId;
     }
 
+    public Boolean getFavored() {
+        return favored;
+    }
+
+    public void setFavored(Boolean favored) {
+        this.favored = favored;
+    }
+
     public void setPaperId(String paperId) {
         this.paperId = paperId;
-    }
-
-    public String getPaperStart() {
-        return paperStart;
-    }
-
-    public void setPaperStat(String paperStart) {
-        this.paperStart = paperStart;
-    }
-
-    public String getPaperEnd() {
-        return paperEnd;
-    }
-
-    public void setPaperEnd(String paperEnd) {
-        this.paperEnd = paperEnd;
-    }
-
-    public String getDocType() {
-        return docType;
-    }
-
-    public void setDocType(String docType) {
-        this.docType = docType;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
     }
 
     public String getPublisher() {
@@ -90,22 +42,6 @@ public class Paper implements Serializable {
 
     public void setPublisher(String publisher) {
         this.publisher = publisher;
-    }
-
-    public String getVolume() {
-        return volume;
-    }
-
-    public void setVolume(String volume) {
-        this.volume = volume;
-    }
-
-    public String getIssue() {
-        return issue;
-    }
-
-    public void setIssue(String issue) {
-        this.issue = issue;
     }
 
     public String getIsbn() {
@@ -148,14 +84,6 @@ public class Paper implements Serializable {
         this.keywords = keywords;
     }
 
-    public String getFieldOfStudy() {
-        return fieldOfStudy;
-    }
-
-    public void setFieldOfStudy(String fieldOfStudy) {
-        this.fieldOfStudy = fieldOfStudy;
-    }
-
     public int getnCitation() {
         return nCitation;
     }
@@ -172,11 +100,23 @@ public class Paper implements Serializable {
         this.title = title;
     }
 
-    public String getUrl() {
+    public List<String> getKeywords() {
+        return keywords;
+    }
+
+    public String getIssn() {
+        return issn;
+    }
+
+    public void setIssn(String issn) {
+        this.issn = issn;
+    }
+
+    public List<String> getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    public void setUrl(List<String> url) {
         this.url = url;
     }
 

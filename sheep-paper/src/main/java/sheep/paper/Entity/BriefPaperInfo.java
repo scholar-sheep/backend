@@ -7,8 +7,6 @@ public class BriefPaperInfo {
     private String paperTitle;
     private List<String> authorNames;
     private String paperAbstract;
-    private String docType;
-    private String lang;
     private String publisher;
     private String pdfLink;
     private boolean favored;
@@ -43,22 +41,6 @@ public class BriefPaperInfo {
 
     public void setPaperAbstract(String paperAbstract) {
         this.paperAbstract = paperAbstract;
-    }
-
-    public String getDocType() {
-        return docType;
-    }
-
-    public void setDocType(String docType) {
-        this.docType = docType;
-    }
-
-    public String getLang() {
-        return lang;
-    }
-
-    public void setLang(String lang) {
-        this.lang = lang;
     }
 
     public String getPublisher() {
