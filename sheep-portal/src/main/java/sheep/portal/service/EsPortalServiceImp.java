@@ -166,7 +166,7 @@ public class EsPortalServiceImp implements EsPortalService{
                 return 2;
             }
         }
-        updateNpubs(1, portal_id);
+//        updateNpubs(1, portal_id);
         return redisUtil.lSet(portal_id,paperModel)==true?1:0;
     }
     @Override
@@ -178,7 +178,7 @@ public class EsPortalServiceImp implements EsPortalService{
         {
             PaperModel paper=(PaperModel)item;
             if(paper.getId().equals(paper_id)){
-                updateNpubs(-1, portal_id);
+//                updateNpubs(-1, portal_id);
                 return redisUtil.lRemove(portal_id,0,item)>0?1:0;
             }
         }
@@ -187,22 +187,22 @@ public class EsPortalServiceImp implements EsPortalService{
     @Override
     public int createPaper(String portal_id,PaperParam paperParam) throws IOException {
         PaperModel newPaper= new PaperModel(paperParam);
-        updateNpubs(1, portal_id);
+//        updateNpubs(1, portal_id);
         return redisUtil.lSet(portal_id, newPaper) == true ? 1 : 0;
     }
 
-    //在删除和增加论文时修改门户的n_pubs
-    public void updateNpubs(int num, String portal_id) throws IOException {
-        GetRequest getRequest = new GetRequest("sheep-scholar", portal_id);
-        GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
-        String sourceAsString = response.getSourceAsString();
-        EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
-        //构建改的hashmap
-        Map<String, Object> jsonMap = new HashMap<>();
-        jsonMap.put("n_pubs", esPortal.getN_pubs() + num);
-        //构建updateRequest
-        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", portal_id);
-        updateRequest.doc(jsonMap);
-        UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
-    }
+//    //在删除和增加论文时修改门户的n_pubs
+//    public void updateNpubs(int num, String portal_id) throws IOException {
+//        GetRequest getRequest = new GetRequest("sheep-scholar", portal_id);
+//        GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
+//        String sourceAsString = response.getSourceAsString();
+//        EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
+//        //构建改的hashmap
+//        Map<String, Object> jsonMap = new HashMap<>();
+//        jsonMap.put("n_pubs", esPortal.getN_pubs() + num);
+//        //构建updateRequest
+//        UpdateRequest updateRequest = new UpdateRequest("sheep-scholar", "_doc", portal_id);
+//        updateRequest.doc(jsonMap);
+//        UpdateResponse updateResponse = highLevelClient.update(updateRequest,RequestOptions.DEFAULT);
+//    }
 }
