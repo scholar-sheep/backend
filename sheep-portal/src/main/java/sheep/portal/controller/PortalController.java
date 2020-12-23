@@ -51,7 +51,7 @@ public class PortalController {
         catch (AdoptFailException adoptFailException){
             return ResultDTO.errorOf(ErrorType.CREATE_PORTAL_ERROR);
         }
-        return ResultDTO.okOf();
+        return ResultDTO.okOf(esPortal.getId());
     }
 
     /**
