@@ -3,6 +3,7 @@ package sheep.algorithm.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+import sheep.algorithm.pojo.NetworkResult;
 import sheep.algorithm.service.RelationNetwork;
 import sheep.common.utils.ResultDTO;
 
@@ -19,7 +20,8 @@ public class AlogrithmController {
 
     @GetMapping(value = {"/network"})
     public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
-        ArrayList<ArrayList> network = relationNetwork.getNetwork(portal_id);
+        NetworkResult network = relationNetwork.getNetwork(portal_id);
+       // NetworkResult network= relationNetwork.generateNetwork(portal_id);
         return ResultDTO.okOf(network);
     }
 }

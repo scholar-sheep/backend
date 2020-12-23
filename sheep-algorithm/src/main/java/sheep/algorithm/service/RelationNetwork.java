@@ -13,6 +13,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sheep.algorithm.config.RedisUtil;
+import sheep.algorithm.pojo.NetworkResult;
 import sheep.algorithm.pojo.Scholar;
 import sheep.algorithm.config.Client;
 
@@ -28,12 +29,13 @@ public class RelationNetwork {
     public  String scholarIndex = "sheep-scholar", paperIndex = "sheep-paper";
     @Autowired
     RedisUtil redisUtil;
-    public  ArrayList<ArrayList> generateNetwork(String scholarId){
+    public NetworkResult generateNetwork(String scholarId){
         RestHighLevelClient client = Client.getClient();
 
         ArrayList<RelationLine> relationLines = new ArrayList<>();
         ArrayList<RelationNode> relationNodes = new ArrayList<>();
-        ArrayList<ArrayList> result = new ArrayList<>();
+        NetworkResult result=new NetworkResult();
+        //ArrayList<ArrayList> result = new ArrayList<>();
         int[] a = {2, 3};
         ArrayList<String> relationResult1 = new ArrayList<>(), relationResult2 = new ArrayList<>();
         relationResult1.add(scholarId);
@@ -54,9 +56,9 @@ public class RelationNetwork {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        result.add(relationLines);
-        result.add(relationNodes);
+        if(relationLines!=null&&relationNodes!=null){
+        result.setNodes(relationNodes);
+        result.setLines(relationLines);}
         return result;
 
     }
@@ -101,18 +103,25 @@ public class RelationNetwork {
                     tid = temp.get("id").toString();
                     tscholar=(Scholar)JSONObject.toBean(temp,Scholar.class,classMap);
                     //tname = temp.get("name").toString();
-                    if(!tid.isEmpty() && !ids.contains(tid)){
+                    if(!tid.isEmpty() && !tid.equals(scholarId) && !ids.contains(tid)){
                         ids.add(tid);
                         scholars.add(tscholar);
                     }
                 }
                 System.out.println(jsonObject);
             }
-
-            relationNodes.add(new RelationNode(sourceScholar));
+            RelationNode sourceNode=new RelationNode(sourceScholar);
+            if(!relationNodes.contains(sourceNode))
+                relationNodes.add(sourceNode);
             for(Scholar targetScholar : scholars){
-                relationNodes.add(new RelationNode(targetScholar));
-                relationLines.add(new RelationLine(sourceScholar, targetScholar));
+                RelationNode tnode = new RelationNode(targetScholar);
+                RelationLine tline = new RelationLine(sourceScholar, targetScholar);
+                if(!relationNodes.contains(tnode)){
+                    relationNodes.add(tnode);
+                }
+                if(!relationLines.contains(tline)){
+                    relationLines.add(tline);
+                }
             }
 
 //            System.out.println(jsonObject);
@@ -124,12 +133,12 @@ public class RelationNetwork {
         return ids;
     }
 
-    public ArrayList<ArrayList> getNetwork(String id) throws IOException
+    public NetworkResult getNetwork(String id) throws IOException
     {
         //若redis中不存在则先存入
         if(!redisUtil.hasKey("network"+id))
             redisUtil.set("network"+id,this.generateNetwork(id),15);
-       return (ArrayList<ArrayList>)redisUtil.get("network"+id);
+       return (NetworkResult)redisUtil.get("network"+id);
     }
 }
 
@@ -141,10 +150,41 @@ class RelationLine{
     Scholar source;
     Scholar target;
 
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(obj instanceof RelationLine){
+            RelationLine other = (RelationLine) obj;
+            return (this.source.getId().equals(other.source.getId()) && this.target.getId().equals(other.target.getId()))
+                    || (this.source.getId().equals(other.target.getId()) && this.target.getId().equals(other.source.getId()));
+        }
+        return false;
+    }
+
 }
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 class RelationNode{
     Scholar scholar;
+
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(obj instanceof RelationNode){
+            RelationNode other = (RelationNode) obj;
+            return this.scholar.getId().equals(other.scholar.getId());
+        }
+        return false;
+    }
 }
