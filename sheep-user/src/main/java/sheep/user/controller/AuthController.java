@@ -15,7 +15,7 @@ public class AuthController {
             HttpServletRequest request,
             HttpServletResponse response
     ) {
-        String token = request.getHeader("X-Forward-Token");
+        String token = request.getHeader("Token");
         if (token == null || token.equals("")) {
             return;
         }
