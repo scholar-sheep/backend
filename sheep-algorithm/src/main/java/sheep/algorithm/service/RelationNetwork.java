@@ -2,6 +2,7 @@ package sheep.algorithm.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -9,19 +10,24 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sheep.algorithm.config.RedisUtil;
 import sheep.algorithm.pojo.Scholar;
 import sheep.algorithm.config.Client;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
 @Slf4j
 public class RelationNetwork {
     public  String scholarIndex = "sheep-scholar", paperIndex = "sheep-paper";
+    @Autowired
+    RedisUtil redisUtil;
     public  ArrayList<ArrayList> generateNetwork(String scholarId){
         RestHighLevelClient client = Client.getClient();
 
@@ -123,10 +129,20 @@ public class RelationNetwork {
         }
         return ids;
     }
+
+    public ArrayList<ArrayList> getNetwork(String id) throws IOException
+    {
+        //若redis中不存在则先存入
+        if(!redisUtil.hasKey("network"+id))
+            redisUtil.set("network"+id,this.generateNetwork(id),15);
+       return (ArrayList<ArrayList>)redisUtil.get("network"+id);
+    }
 }
+
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 class RelationLine{
     Scholar source;
     Scholar target;
@@ -150,6 +166,7 @@ class RelationLine{
 }
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 class RelationNode{
     Scholar scholar;
 

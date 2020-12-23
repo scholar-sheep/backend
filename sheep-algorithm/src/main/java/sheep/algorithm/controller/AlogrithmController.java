@@ -8,6 +8,7 @@ import sheep.common.utils.ResultDTO;
 
 import javax.naming.directory.SearchResult;
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.ArrayList;
 
 
@@ -17,8 +18,8 @@ public class AlogrithmController {
     private RelationNetwork relationNetwork;
 
     @GetMapping(value = {"/network"})
-    public Object Search(@RequestParam(value = "portal_id") String portal_id) {
-        ArrayList<ArrayList> network = relationNetwork.generateNetwork(portal_id);
+    public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
+        ArrayList<ArrayList> network = relationNetwork.getNetwork(portal_id);
         return ResultDTO.okOf(network);
     }
 }
