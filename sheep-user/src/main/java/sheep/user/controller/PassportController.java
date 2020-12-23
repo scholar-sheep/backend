@@ -57,7 +57,7 @@ public class PassportController {
 
         if (encoder.matches(password, user.getPassword())) {
             String token = JwtUtil.generatorToken(user.getID());
-            response.setHeader("X-Token", token);
+            response.setHeader("Token", token);
             response.setStatus(200);
             LoginResult result = new LoginResult();
             result.setToken(token);
@@ -92,7 +92,7 @@ public class PassportController {
                 l.setToken(JwtUtil.generatorToken(user.getID()));
                 l.setUserId(user.getID());
                 response.setStatus(200);
-                return l;
+                return ResultDTO.okOf(l);
             }
             else return ResultDTO.errorOf(ErrorType.INSERT_ERROR);
         }
