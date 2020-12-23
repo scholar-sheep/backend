@@ -65,7 +65,7 @@ public class SearchScholarImp implements SearchScholarService {
         searchSourceBuilder.size(pagesize);
 
         //sheep-paper是要查询的索引
-        SearchRequest request = new SearchRequest(new String[]{"sheep-scholar"}, searchSourceBuilder);
+        SearchRequest request = new SearchRequest(new String[]{"sheep-scholar-test"}, searchSourceBuilder);
         return request;
     }
 
