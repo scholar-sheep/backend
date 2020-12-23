@@ -34,14 +34,13 @@ public class PassportController {
     ) {
         User user = null;
         try {
-            String loginType = request.getHeader("X-Forward-LoginType");
-            System.out.println("loginType: " + loginType + "\n");
+            String loginType = request.getHeader("XForwardLoginType");
             if (loginType.equals("Username")) {
-                String username = request.getHeader("X-Forward-Username");
+                String username = request.getHeader("XForwardUsername");
                 user = userService.getUserByName(username);
                 System.out.println("username: " + username + "\n");
             } else if (loginType.equals("Tel")) {
-                String phoneNumber = request.getHeader("X-Forward-Tel");
+                String phoneNumber = request.getHeader("XForwardTel");
                 user = userService.getUserByTel(phoneNumber);
             }
         } catch (Exception e) {
@@ -54,7 +53,7 @@ public class PassportController {
            return "login fail";
         }
 
-        String password = request.getHeader("X-Forward-Password");
+        String password = request.getHeader("XForwardPassword");
 
         if (encoder.matches(password, user.getPassword())) {
             String token = JwtUtil.generatorToken(user.getID());
