@@ -95,7 +95,7 @@ public class RelationNetwork {
                     tid = temp.get("id").toString();
                     tscholar=(Scholar)JSONObject.toBean(temp,Scholar.class,classMap);
                     //tname = temp.get("name").toString();
-                    if(!tid.isEmpty() && !ids.contains(tid)){
+                    if(!tid.isEmpty() && !tid.equals(scholarId) && !ids.contains(tid)){
                         ids.add(tid);
                         scholars.add(tscholar);
                     }
@@ -105,8 +105,14 @@ public class RelationNetwork {
 
             relationNodes.add(new RelationNode(sourceScholar));
             for(Scholar targetScholar : scholars){
-                relationNodes.add(new RelationNode(targetScholar));
-                relationLines.add(new RelationLine(sourceScholar, targetScholar));
+                RelationNode tnode = new RelationNode(targetScholar);
+                RelationLine tline = new RelationLine(sourceScholar, targetScholar);
+                if(!relationNodes.contains(tnode)){
+                    relationNodes.add(tnode);
+                }
+                if(!relationLines.contains(tline)){
+                    relationLines.add(tline);
+                }
             }
 
 //            System.out.println(jsonObject);
@@ -125,9 +131,40 @@ class RelationLine{
     Scholar source;
     Scholar target;
 
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(obj instanceof RelationLine){
+            RelationLine other = (RelationLine) obj;
+            return (this.source.getId().equals(other.source.getId()) && this.target.getId().equals(other.target.getId()))
+                    || (this.source.getId().equals(other.target.getId()) && this.target.getId().equals(other.source.getId()));
+        }
+        return false;
+    }
+
 }
 @Data
 @AllArgsConstructor
 class RelationNode{
     Scholar scholar;
+
+    @Override
+    public boolean equals(Object obj){
+        if(this == obj){
+            return true;
+        }
+        if(obj == null){
+            return false;
+        }
+        if(obj instanceof RelationNode){
+            RelationNode other = (RelationNode) obj;
+            return this.scholar.getId().equals(other.scholar.getId());
+        }
+        return false;
+    }
 }
