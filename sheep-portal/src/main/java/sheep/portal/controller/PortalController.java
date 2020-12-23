@@ -20,6 +20,7 @@ import sheep.portal.service.PortalService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -163,6 +164,7 @@ public class PortalController {
         }
         return ResultDTO.okOf();
     }
+
     /**
      * 添加论文，路径参数为门户id 查询参数为论文id
      * @param portal_id
@@ -291,6 +293,29 @@ public class PortalController {
     @LoginRequired
     public Object followNum(@RequestParam(value = "portal_id") String portal_id){
         return ResultDTO.okOf(portalService.followNum(portal_id));
+    }
+
+    /**
+     * 获取当前用户的关注列表
+     * @return
+     */
+    @RequestMapping(value = "/portal/followList", method = RequestMethod.GET)
+    @LoginRequired
+    public Object followList(){
+        try{
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+            List<String> idList = portalService.followList(user_id);
+            List<EsPortal> followList = new ArrayList<>();
+            for(String id : idList){
+                followList.add(esPortalService.getInformation(id));
+            }
+            return ResultDTO.okOf(followList);
+        }
+        catch(IOException e){
+            return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+        }
     }
 
     /**

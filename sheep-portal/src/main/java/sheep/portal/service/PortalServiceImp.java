@@ -3,6 +3,7 @@ package sheep.portal.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import sheep.portal.entity.EsPortal;
 import sheep.portal.entity.Follow;
 import sheep.portal.entity.PortalAndUser;
 import sheep.portal.exception.AdoptFailException;
@@ -10,6 +11,8 @@ import sheep.portal.exception.FollowFailException;
 import sheep.portal.exception.NoPortalException;
 import sheep.portal.mapper.FollowMapper;
 import sheep.portal.mapper.PortalAndUserMapper;
+
+import java.util.List;
 
 @Service
 public class PortalServiceImp implements PortalService{
@@ -113,6 +116,15 @@ public class PortalServiceImp implements PortalService{
      */
     public int followNum(String portal_id){
         return followMapper.followNum(portal_id);
+    }
+
+    /**
+     * 获取用户的关注列表
+     * @param user_id
+     * @return
+     */
+    public List<String> followList(int user_id){
+        return followMapper.followList(user_id);
     }
 
 }
