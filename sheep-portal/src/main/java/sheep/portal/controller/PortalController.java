@@ -313,4 +313,23 @@ public class PortalController {
             return ResultDTO.okOf("没关系");
     }
 
+    /**
+     * 查询当前用户是否已经有门户了
+     * @return
+     */
+    @RequestMapping(value = "/portal/hasPortalOrNot", method = RequestMethod.GET)
+    @LoginRequired
+    public Object findPortalByUserId(){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+        try{
+            String portal_id = portalService.findPortalByUserId(user_id);
+            return ResultDTO.okOf(portal_id);
+        }
+        catch (NoPortalException e){
+            return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+        }
+    }
+
 }
