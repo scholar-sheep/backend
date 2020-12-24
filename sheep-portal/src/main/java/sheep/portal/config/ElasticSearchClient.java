@@ -25,8 +25,8 @@ public class ElasticSearchClient {
                     RestClient.builder(httpHosts.toArray(new HttpHost[0])));
         } else {
             client = new RestHighLevelClient(
-                    RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
-//                    RestClient.builder(new HttpHost("152.136.122.218", 9200, "http")));
+//                    RestClient.builder(new HttpHost("127.0.0.1", 9200, "http")));
+                    RestClient.builder(new HttpHost("152.136.122.218", 9200, "http")));
         }
         return client;
     }
