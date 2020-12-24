@@ -26,21 +26,21 @@ public class SearchController {
     @Autowired
     private SearchScholarService searchScholarService;
 
-    @PostMapping(value = {"/searchPaper"})
+    @PostMapping(value = {"/search/paper"})
     public Object Search(@RequestBody SearchParam searchParam, HttpServletRequest request) {
         searchParam.set_queryString(request.getQueryString());
         SearchResult result=advancedSearchService.getSearchResult(searchParam);
         return ResultDTO.okOf(result);
     }
 
-    @PostMapping(value = {"/searchScholar"})
+    @PostMapping(value = {"/search/scholar"})
     public Object Search(@RequestBody ScholarParam searchParam, HttpServletRequest request) {
         if(StringUtils.isEmpty(searchParam.getName()))
             return ResultDTO.errorOf(ErrorType.MISS_NANME);
         SearchResult result=searchScholarService.getSearchResult(searchParam);
         return ResultDTO.okOf(result);
     }
-    @GetMapping(value = {"/hotSearch"})
+    @GetMapping(value = {"/search/hot"})
     public Object Search( HttpServletRequest request) {
         SearchResult result=advancedSearchService.hotSearchWord();
         return ResultDTO.okOf(result);
