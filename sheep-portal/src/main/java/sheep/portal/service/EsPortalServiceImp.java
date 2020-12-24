@@ -47,6 +47,8 @@ public class EsPortalServiceImp implements EsPortalService{
     @Override
     public void save(EsPortal esPortal){
         esPortalMapper.save(esPortal);
+        esPortal.setId(esPortal.getId());
+        esPortalMapper.save(esPortal);
     }
 
     @Override
