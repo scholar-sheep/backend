@@ -161,9 +161,40 @@ public class PaperController {
             if (paperInfoStr==null) {
                 continue;
             }
-//            BriefPaperInfo paperInfo = paperService.makeUpBriefPaperInfoWithOutFavorInfo(paperInfoStr, favorite.getPaperid());
-//            paperInfo.setFavored(true);
-//            paperList.add(paperInfo);
+            PaperData paper = JSON.parseObject(paperInfoStr, PaperData.class);
+            BriefPaperInfo paperInfo = new BriefPaperInfo();
+            try {
+                paperInfo.setPaperId(paper.getId());
+            } catch (Exception e) {
+                ;
+            }
+            try {
+                paperInfo.setPaperTitle(paper.getTitle());
+            } catch (Exception e) {
+                ;
+            }
+            try {
+                paperInfo.setAuthorNames(paper.getAuthorNames());
+            } catch (Exception e) {
+                ;
+            }
+            try {
+                paperInfo.setnCitation(paper.getN_citation());
+            } catch (Exception e) {
+                ;
+            }
+            try {
+                paperInfo.setVenue(paper.getVenue().getRaw());
+            } catch (Exception e) {
+                ;
+            }
+            try {
+                paperInfo.setYear(paper.getYear());
+            } catch (Exception e) {
+                ;
+            }
+            paperInfo.setFavored(true);
+            paperList.add(paperInfo);
         }
         return ResultDTO.okOf(paperList);
     }

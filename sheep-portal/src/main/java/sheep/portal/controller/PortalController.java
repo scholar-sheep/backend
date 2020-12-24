@@ -411,7 +411,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
-
+//        int this_user_id = 1;
 
         Message sendMessage = new Message(this_user_id, that_user_id, message);
         portalService.sendMessage(sendMessage);
