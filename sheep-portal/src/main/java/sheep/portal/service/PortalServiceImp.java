@@ -137,7 +137,12 @@ public class PortalServiceImp implements PortalService{
     }
 
 
-    //消息功能
+
+    /**
+     * 根据当前用户ID获取和他聊天的所有人的ID
+     * @param this_user_id
+     * @return
+     */
     public List<Integer> peopleList(int this_user_id){
         List<Integer> list1 = messageMapper.peopleList1(this_user_id);
         List<Integer> list2 = messageMapper.peopleList2(this_user_id);
@@ -146,19 +151,39 @@ public class PortalServiceImp implements PortalService{
         return list1;
     }
 
+    /**
+     * 根据当前用户ID和指定用户id获取他们的聊天记录
+     * @param this_user_id
+     * @param that_user_id
+     * @return
+     */
     public List<Message> messageList(int this_user_id, int that_user_id){
         List<Message> messageList = messageMapper.messageList(this_user_id, that_user_id);
         return messageList;
     }
 
+    /**
+     * 发送消息
+     * @param message
+     */
     public void sendMessage(Message message){
         messageMapper.sendMessage(message);
     }
 
+    /**
+     * 已读消息
+     * @param this_user_id
+     * @param that_user_id
+     */
     public void readMessage(int this_user_id, int that_user_id){
         messageMapper.readMessage(this_user_id, that_user_id);
     }
 
+    /**
+     * 删除对话框
+     * @param this_user_id
+     * @param that_user_id
+     */
     public void deleteDislog(int this_user_id, int that_user_id){
         messageMapper.deleteDislog(this_user_id, that_user_id);
     }

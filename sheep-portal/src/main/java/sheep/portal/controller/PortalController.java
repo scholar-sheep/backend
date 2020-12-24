@@ -375,6 +375,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//        int this_user_id = 1;
 
         List<Integer> peopleList = portalService.peopleList(this_user_id);
         return ResultDTO.okOf(peopleList);
@@ -391,6 +392,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//        int this_user_id = 1;
 
         List<Message> messageList = portalService.messageList(this_user_id, that_user_id);
         return ResultDTO.okOf(messageList);
