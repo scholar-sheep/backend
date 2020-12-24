@@ -1,18 +1,24 @@
 package sheep.portal.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.redisson.api.BatchResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sheep.portal.entity.EsPortal;
 import sheep.portal.entity.Follow;
+import sheep.portal.entity.Message;
 import sheep.portal.entity.PortalAndUser;
 import sheep.portal.exception.AdoptFailException;
 import sheep.portal.exception.FollowFailException;
 import sheep.portal.exception.NoPortalException;
 import sheep.portal.mapper.FollowMapper;
+import sheep.portal.mapper.MessageMapper;
 import sheep.portal.mapper.PortalAndUserMapper;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PortalServiceImp implements PortalService{
@@ -22,6 +28,9 @@ public class PortalServiceImp implements PortalService{
 
     @Autowired
     FollowMapper followMapper;
+
+    @Autowired
+    MessageMapper messageMapper;
 
 
     /**
@@ -125,6 +134,33 @@ public class PortalServiceImp implements PortalService{
      */
     public List<String> followList(int user_id){
         return followMapper.followList(user_id);
+    }
+
+
+    //消息功能
+    public List<Integer> peopleList(int this_user_id){
+        List<Integer> list1 = messageMapper.peopleList1(this_user_id);
+        List<Integer> list2 = messageMapper.peopleList2(this_user_id);
+        list1.removeAll(list2);
+        list1.addAll(list2);
+        return list1;
+    }
+
+    public List<Message> messageList(int this_user_id, int that_user_id){
+        List<Message> messageList = messageMapper.messageList(this_user_id, that_user_id);
+        return messageList;
+    }
+
+    public void sendMessage(Message message){
+        messageMapper.sendMessage(message);
+    }
+
+    public void readMessage(int this_user_id, int that_user_id){
+        messageMapper.readMessage(this_user_id, that_user_id);
+    }
+
+    public void deleteDislog(int this_user_id, int that_user_id){
+        messageMapper.deleteDislog(this_user_id, that_user_id);
     }
 
 }

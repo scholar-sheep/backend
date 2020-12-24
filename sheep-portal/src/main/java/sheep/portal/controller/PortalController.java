@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import sheep.common.exception.ErrorType;
+import sheep.portal.entity.Message;
 import sheep.portal.exception.FollowFailException;
 import sheep.portal.pojo.PaperModel;
 import sheep.portal.util.*;
@@ -20,10 +21,7 @@ import sheep.portal.service.PortalService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @CrossOrigin
@@ -356,6 +354,7 @@ public class PortalController {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = attributes.getRequest();
         int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//        int user_id = 1;
         try{
             String portal_id = portalService.findPortalByUserId(user_id);
             return ResultDTO.okOf(portal_id);
@@ -363,6 +362,91 @@ public class PortalController {
         catch (NoPortalException e){
             return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
         }
+    }
+
+
+    /**
+     * 获取与当前用户聊过天的所有用户ID
+     * @return
+     */
+    @RequestMapping(value = "/portal/peopleList", method = RequestMethod.GET)
+    @LoginRequired
+    public Object peopleList(){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+
+        List<Integer> peopleList = portalService.peopleList(this_user_id);
+        return ResultDTO.okOf(peopleList);
+    }
+
+
+    /**
+     * 获取和指定用户的消息记录
+     * @return
+     */
+    @RequestMapping(value = "/portal/message", method = RequestMethod.GET)
+    @LoginRequired
+    public Object messageList(@RequestParam(value = "that_user_id") int that_user_id){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+
+        List<Message> messageList = portalService.messageList(this_user_id, that_user_id);
+        return ResultDTO.okOf(messageList);
+    }
+
+
+    /**
+     * 发送消息
+     * @param that_user_id
+     * @param message
+     * @return
+     */
+    @RequestMapping(value = "/portal/message", method = RequestMethod.POST)
+    @LoginRequired
+    public Object sendMessage(@RequestParam(value = "that_user_id") int that_user_id, @RequestParam(value = "message") String message){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+
+
+        Message sendMessage = new Message(this_user_id, that_user_id, message);
+        portalService.sendMessage(sendMessage);
+        return ResultDTO.okOf();
+    }
+
+
+    /**
+     * 已读消息
+     * @param that_user_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/message", method = RequestMethod.PUT)
+    @LoginRequired
+    public Object readMessage(@RequestParam(value = "that_user_id") int that_user_id){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+
+        portalService.readMessage(this_user_id, that_user_id);
+        return ResultDTO.okOf();
+    }
+
+    /**
+     * 删除对话框
+     * @param that_user_id
+     * @return
+     */
+    @RequestMapping(value = "/portal/message", method = RequestMethod.DELETE)
+    @LoginRequired
+    public Object deleteDislog(@RequestParam(value = "that_user_id") int that_user_id){
+        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        HttpServletRequest request = attributes.getRequest();
+        int this_user_id = Integer.parseInt(request.getHeader("X-UserId"));
+
+        portalService.deleteDislog(this_user_id, that_user_id);
+        return ResultDTO.okOf();
     }
 
 }
