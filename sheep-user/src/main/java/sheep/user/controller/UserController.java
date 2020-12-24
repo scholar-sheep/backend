@@ -29,19 +29,19 @@ public class UserController {
     private UserServiceImp userService;
 
     //返回所有用户列表
-    @RequestMapping(value = "/getuserlist", method = RequestMethod.GET)
-    public List<User> getUserList(){
-        return userService.getUserList();
-    }
+//    @RequestMapping(value = "/user/getuserlist", method = RequestMethod.GET)
+//    public List<User> getUserList(){
+//        return userService.getUserList();
+//    }
 
-    //通过username查找到用户
-    @RequestMapping(value="/getuserbyname/{username}",method = RequestMethod.GET)
-    public Object getUserByName(@PathVariable String username){
-        User result = userService.getUserByName(username);
-        if(result!=null)
-            return userService.getUserByName(username);
-        else return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
-    }
+//    //通过username查找到用户
+//    @RequestMapping(value="/user/getuserbyname/{username}",method = RequestMethod.GET)
+//    public Object getUserByName(@PathVariable String username){
+//        User result = userService.getUserByName(username);
+//        if(result!=null)
+//            return userService.getUserByName(username);
+//        else return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
+//    }
 
 //    @PostMapping("/test")
 //    public int test(@RequestParam("mobile") String mobile,@RequestParam("code")String code){
@@ -96,7 +96,7 @@ public class UserController {
     }
 
     //上传头像
-    @PostMapping(value = "/avatar")
+    @PostMapping(value = "/user/avatar")
     public Object uploadAvatar(@RequestParam("avatar")MultipartFile file,@RequestParam("ID")int ID, HttpServletRequest request) throws IOException {
         //先查看用户是否存在
         User user = userService.getUserById(ID);
@@ -137,7 +137,7 @@ public class UserController {
     }
 
     //关注 currentID为当前用户ID followID为其关注的用户ID
-    @PostMapping("/follow")
+    @PostMapping("/user/follow")
     public Object follow(int currentID,int followID){
         int result = userService.follow(currentID,followID);
         if(result!=0)
@@ -146,7 +146,7 @@ public class UserController {
     }
 
     //查看关注用户列表
-    @RequestMapping(value = "/follow/{ID}",method = RequestMethod.GET)
+    @RequestMapping(value = "/user/follow/{ID}",method = RequestMethod.GET)
     public List<User> getFollow(@PathVariable("ID") int ID){
         List<Integer> result= userService.getFollow(ID);
         List<User> userList = new ArrayList<>();
@@ -158,7 +158,7 @@ public class UserController {
     }
 
     //收藏学术成果
-    @PostMapping(value = "/collect")
+    @PostMapping(value = "/user/collect")
     public Object collect(int userId,int paperId,int infoId){
         int result = userService.collect(userId,paperId,infoId);
         if(result!=0)
@@ -167,7 +167,7 @@ public class UserController {
     }
 
     //查看收藏列表
-    @RequestMapping(value = "/collect/{ID}",method = RequestMethod.GET)
+    @RequestMapping(value = "/user/collect/{ID}",method = RequestMethod.GET)
     public List<Paper> getCollect(@PathVariable("ID") int ID){
         List<UserCollect> result = userService.getCollect(ID);
         System.out.println(result);
