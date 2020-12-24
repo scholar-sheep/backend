@@ -3,32 +3,35 @@ package sheep.paper.Entity;
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import org.springframework.data.annotation.Transient;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
-public class PaperData {
+@AllArgsConstructor
+@NoArgsConstructor
+public class PaperModel {
     private String id;
     private String title;
     @JSONField(name = "abstract")
     private String Abstract;
     private List<Author> authors;
-    private String authorNames;
     private Venue venue;
     private int year;
     private int n_citation;
-    private List<String> url;
-    private List<PaperModel> paperList;
+    private String authorNames;
+    private String venueName;
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Author
     {
-        private String id;
         private String name;
         private String org;
     }
     @Data
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class Venue
     {
@@ -36,6 +39,4 @@ public class PaperData {
         private String raw;
     }
 
-    @Transient
-    Boolean favored;
 }
