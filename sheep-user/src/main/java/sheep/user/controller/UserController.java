@@ -21,6 +21,7 @@ import java.util.*;
 
 
 @RestController
+@CrossOrigin
 public class UserController {
     /*@Autowired
     UserService userService;*/
