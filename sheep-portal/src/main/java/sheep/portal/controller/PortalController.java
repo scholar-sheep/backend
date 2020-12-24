@@ -112,7 +112,7 @@ public class PortalController {
      * @return
      */
     @CrossOrigin
-    @RequestMapping(value = "/portal", method = RequestMethod.GET)
+    @RequestMapping(value = "/portal/portal", method = RequestMethod.GET)
     public Object getInformation(@RequestParam(value = "sort",required = false) String sort,
                                  @RequestParam(value= "id") String id) {
         try{
