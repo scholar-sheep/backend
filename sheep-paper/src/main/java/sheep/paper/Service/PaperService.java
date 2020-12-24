@@ -2,12 +2,9 @@ package sheep.paper.Service;
 
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
-import org.springframework.data.jpa.repository.Modifying;
 import sheep.paper.Entity.BriefPaperInfo;
 import sheep.paper.Entity.Favorite;
-import sheep.paper.Entity.Paper;
 
-import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -22,24 +19,7 @@ public interface PaperService {
      * @Param [paperIdStr]
      * @return java.util.Map<java.lang.String,java.lang.Object>
      **/
-    Map<String, Object> getEsInfoById(String paperIdStr);
-
-
-    /*
-     *
-     * @Description 构造 BriefPaperInfo 对象，不包含是否收藏的信息
-     * @Param [paper, responseMap]
-     * @return sheep.paper.Entity.BriefPaperInfo
-     **/
-    BriefPaperInfo makeUpBriefPaperInfoWithOutFavorInfo(Map<String, Object> responseMap, String paperIdStr);
-
-    /*
-     *
-     * @Description 构造 Paper 对象，不包含是否收藏的信息
-     * @Param [paper, responseMap]
-     * @return sheep.paper.Entity.BriefPaperInfo
-     **/
-    Paper makeUpPaperInfoWithOutFavorInfo(Map<String, Object> responseMap, String paperIdStr);
+    String getEsInfoById(String paperIdStr);
 
     /*
      *
