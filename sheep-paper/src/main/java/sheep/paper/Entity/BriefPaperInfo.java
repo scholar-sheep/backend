@@ -5,7 +5,7 @@ import java.util.List;
 public class BriefPaperInfo {
     private String paperId;
     private String paperTitle;
-    private List<String> authorNames;
+    private String authorNames;
     private int nCitation;
     private String venue;
     private int year;
@@ -55,11 +55,11 @@ public class BriefPaperInfo {
         this.paperTitle = paperTitle;
     }
 
-    public List<String> getAuthorNames() {
+    public String getAuthorNames() {
         return authorNames;
     }
 
-    public void setAuthorNames(List<String> authorNames) {
+    public void setAuthorNames(String authorNames) {
         this.authorNames = authorNames;
     }
 

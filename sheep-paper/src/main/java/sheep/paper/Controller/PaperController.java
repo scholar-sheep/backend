@@ -1,15 +1,13 @@
 package sheep.paper.Controller;
 
+import com.alibaba.fastjson.JSON;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import sheep.common.exception.ErrorType;
 import sheep.common.utils.ResultDTO;
-import sheep.paper.Entity.Author;
-import sheep.paper.Entity.BriefPaperInfo;
-import sheep.paper.Entity.Favorite;
-import sheep.paper.Entity.Paper;
+import sheep.paper.Entity.*;
 import sheep.paper.Service.PaperService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,12 +32,12 @@ public class PaperController {
      **/
     @GetMapping("/info")
     public Object getEsInfoById(@RequestParam String paperIdStr, HttpServletRequest request) {
-        Map map = paperService.getEsInfoById(paperIdStr);
-        if (map==null) {
+        String paperInfoStr = paperService.getEsInfoById(paperIdStr);
+        if (paperInfoStr==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
         else {
-            Paper paper = paperService.makeUpPaperInfoWithOutFavorInfo(map, paperIdStr);
+            PaperData paper = JSON.parseObject(paperInfoStr, PaperData.class);
             int userId;
             try {
                 userId = Integer.parseInt(request.getHeader("X-UserId"));
@@ -65,9 +63,41 @@ public class PaperController {
         } catch (Exception e) {
             return ResultDTO.errorOf(ErrorType.USER_ID_ILLEGAL_ERROR);
         }
-        BriefPaperInfo paperInfo = paperService.getBriefPaperInfoById(paperId, userId);
-        if (paperInfo==null) {
+        String paperInfoStr = paperService.getEsInfoById(paperId);
+        if (paperInfoStr==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
+        }
+        BriefPaperInfo paperInfo = new BriefPaperInfo();
+        PaperData paper = JSON.parseObject(paperInfoStr, PaperData.class);
+        try {
+            paperInfo.setPaperId(paperId);
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setPaperTitle(paper.getTitle());
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setAuthorNames(paper.getAuthorNames());
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setnCitation(paper.getN_citation());
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setVenue(paper.getVenue().getRaw());
+        } catch (Exception e) {
+            ;
+        }
+        try {
+            paperInfo.setYear(paper.getYear());
+        } catch (Exception e) {
+            ;
         }
         return ResultDTO.okOf(paperInfo);
     }
@@ -128,13 +158,13 @@ public class PaperController {
         List<Favorite> result = paperService.getfavorites(userId);
         List<BriefPaperInfo> paperList = new ArrayList<>();
         for (Favorite favorite : result) {
-            Map<String, Object> responseMap = paperService.getEsInfoById(favorite.getPaperid());
-            if (responseMap==null) {
+            String paperInfoStr = paperService.getEsInfoById(favorite.getPaperid());
+            if (paperInfoStr==null) {
                 continue;
             }
-            BriefPaperInfo paperInfo = paperService.makeUpBriefPaperInfoWithOutFavorInfo(responseMap, favorite.getPaperid());
-            paperInfo.setFavored(true);
-            paperList.add(paperInfo);
+//            BriefPaperInfo paperInfo = paperService.makeUpBriefPaperInfoWithOutFavorInfo(paperInfoStr, favorite.getPaperid());
+//            paperInfo.setFavored(true);
+//            paperList.add(paperInfo);
         }
         return ResultDTO.okOf(paperList);
     }
