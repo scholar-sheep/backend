@@ -159,11 +159,13 @@ public class EsPortalServiceImp implements EsPortalService{
     {
         PaperModel paperModel=this.getPaperDetail(paper_id);
         List<Object>paperModels=redisUtil.lGet(portal_id,0,-1);
-        for(Object item:paperModels)
-        {
-            PaperModel paper=(PaperModel)item;
-            if(paper.getId().equals(paper_id)){
-                return 2;
+        if(paperModels!=null&&!paperModels.isEmpty()) {
+            for (Object item : paperModels) {
+                if(item==null)continue;
+                PaperModel paper = (PaperModel) item;
+                if (paper.getId().equals(paper_id)) {
+                    return 2;
+                }
             }
         }
 //        updateNpubs(1, portal_id);

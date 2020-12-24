@@ -43,46 +43,6 @@ public class UserController {
         else return ResultDTO.errorOf(ErrorType.USER_NOT_FOUND);
     }
 
-    //注册
-    @PostMapping("/register")
-    public Object addUser(@RequestBody User user){
-        System.out.println("register"+user);
-        User result1 = userService.getUserByName(user.getUsername());
-        //用户名重复
-        if(result1!=null)
-            return ResultDTO.errorOf(ErrorType.NAME_REPEAT);
-        //手机号格式不对
-        if(user.getMobile().length()!=11)
-            return ResultDTO.errorOf(ErrorType.MOBILE_ERROR);
-        //通过手机号去数据库找验证码
-        String code = userService.getCodeSaved(user.getMobile());
-        String codeSaved = code;
-        //userService.updateUserCode(user.getMobile(), );
-        if(user.getCode().equals(codeSaved)){
-            //对密码加密传输
-            user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
-            if(userService.addUser(user)!=0)
-                return ResultDTO.okOf();
-            else return ResultDTO.errorOf(ErrorType.INSERT_ERROR);
-        }
-        else return ResultDTO.errorOf(ErrorType.CODE_ERROR);
-    }
-
-    //获取验证码
-    @PostMapping("/code/{mobile}")
-    public Object getCode(@PathVariable("mobile") String mobile){
-//        @PostMapping("/code")
-//        public Object getCode(@RequestParam("mobile") String mobile){
-        //手机号重复
-        int result = userService.getUserByMobile(mobile);
-        if(result==0){
-            ResultDTO code =  ResultDTO.okOf();
-            code.setData(userService.getCode(mobile));
-            return code;
-        }
-        return ResultDTO.errorOf(ErrorType.MOBILE_REPEAT);
-    }
-
 //    @PostMapping("/test")
 //    public int test(@RequestParam("mobile") String mobile,@RequestParam("code")String code){
 //        return userService.updateUserCode(mobile,code);
@@ -109,9 +69,9 @@ public class UserController {
             user.setUsertype(origin.getUsertype());
         if(user.getMobile()==null)
             user.setMobile(origin.getMobile());
-        if(user.getPassword()==null)
-            user.setPassword(origin.getPassword());
-        else user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
+//        if(user.getPassword()==null)
+//            user.setPassword(origin.getPassword());
+//        else user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
         if(user.getEmail()==null)
             user.setEmail(origin.getEmail());
         if(user.getNote()==null)
@@ -125,13 +85,20 @@ public class UserController {
             user.setBirthday(calendar.getTime());
         }
 
-        int result = userService.updateUserInfo(user);
+        int result;
+        if(user.getPassword().equals(origin.getPassword())){
+            result = userService.updateUserInfo(user);
+        }
+        else {
+            user.setPassword(new MyPasswordEncoder().encode(user.getPassword()));
+            result = userService.updateUserPassword(ID,user.getPassword());
+            userService.updateUserInfo(user);
+        }
+
         if(result!=0){
             System.out.println("请求后"+userService.getUserById(ID).getBirthday());
-            return ResultDTO.okOf(userService.updateUserInfo(user));
+            return ResultDTO.okOf(result);
         }
-//            return ResultDTO.okOf(userService.getUserById(ID));
-
         else return ResultDTO.errorOf(ErrorType.UPDATE_ERROR);
     }
 

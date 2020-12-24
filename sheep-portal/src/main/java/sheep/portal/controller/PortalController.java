@@ -251,13 +251,13 @@ public class PortalController {
      * @return
      */
     @RequestMapping(value = "/portal/follow", method = RequestMethod.POST)
-//    @LoginRequired
+    @LoginRequired
     public Object follow(@RequestParam(value = "portal_id") String portal_id){
         try{
-//            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-//            HttpServletRequest request = attributes.getRequest();
-//            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-            int user_id = 1;
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             portalService.follow(portal_id, user_id);
         }
         catch(FollowFailException e){
@@ -272,13 +272,13 @@ public class PortalController {
      * @return
      */
     @RequestMapping(value = "/portal/unfollow", method = RequestMethod.DELETE)
-//    @LoginRequired
+    @LoginRequired
     public Object unfollow(@RequestParam(value = "portal_id") String portal_id){
         try{
-//            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-//            HttpServletRequest request = attributes.getRequest();
-//            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-            int user_id = 1;
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             portalService.unfollow(portal_id, user_id);
         }
         catch (Exception e){
@@ -303,25 +303,17 @@ public class PortalController {
      * @return
      */
     @RequestMapping(value = "/portal/followList", method = RequestMethod.GET)
-//    @LoginRequired
+    @LoginRequired
     public Object followList(){
         try{
-//            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-//            HttpServletRequest request = attributes.getRequest();
-//            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-            int user_id = 1;
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            HttpServletRequest request = attributes.getRequest();
+            int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             List<String> idList = portalService.followList(user_id);
-            List<Map> followList = new ArrayList<>();
+            List<EsPortal> followList = new ArrayList<>();
             for(String id : idList){
-                Map<String, String> dataMap = new HashMap<>();
-                EsPortal esPortal = esPortalService.getInformation(id);
-                dataMap.put("id", esPortal.getId());
-                dataMap.put("name", esPortal.getName());
-                dataMap.put("org", esPortal.getOrg());
-                dataMap.put("n_pubs", String.valueOf(esPortal.getN_pubs()));
-                dataMap.put("n_citation", String.valueOf(esPortal.getN_citation()));
-                dataMap.put("isFollow", "1");
-                followList.add(dataMap);
+                followList.add(esPortalService.getInformation(id));
             }
             return ResultDTO.okOf(followList);
         }
