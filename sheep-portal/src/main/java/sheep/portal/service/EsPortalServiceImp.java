@@ -92,6 +92,9 @@ public class EsPortalServiceImp implements EsPortalService{
         GetRequest getRequest = new GetRequest("sheep-scholar",id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
+        if (sourceAsString==null) {
+            return null;
+        }
         EsPortal esPortal= JSON.parseObject(sourceAsString, EsPortal.class);
         esPortal.setId(id);
         return esPortal;
