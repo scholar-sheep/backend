@@ -33,7 +33,7 @@ public class SearchController {
         return ResultDTO.okOf(result);
     }
 
-    @PostMapping(value = {"/search/scholar"})
+    @PostMapping(value = {"/searchScholar"})
     public Object Search(@RequestBody ScholarParam searchParam, HttpServletRequest request) {
         if(StringUtils.isEmpty(searchParam.getName()))
             return ResultDTO.errorOf(ErrorType.MISS_NANME);

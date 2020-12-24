@@ -31,7 +31,8 @@ public class AlogrithmController {
        // NetworkResult network= relationNetwork.generateNetwork(portal_id);
         return ResultDTO.okOf(network);
     }
-    @GetMapping(value = {"/hotfields"})
+    @GetMapping(value = {"/algorithm/hotfields"})
+
     public Object Search() throws IOException {
         FieldResult hotfields=hotField.getHot(10,2019,2020);
         return ResultDTO.okOf(hotfields);
