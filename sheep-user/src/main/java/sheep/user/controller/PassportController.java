@@ -1,10 +1,7 @@
 package sheep.user.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import sheep.user.entity.LoginResult;
 import sheep.user.entity.MyPasswordEncoder;
 import sheep.user.entity.User;
@@ -17,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @RestController
+@CrossOrigin
 public class PassportController {
 
     private final UserServiceImp userService;

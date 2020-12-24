@@ -125,7 +125,7 @@ public class RedisUtil {
     public boolean set(String key, Object value, long time) {
         try {
             if (time > 0) {
-                redisTemplate.opsForValue().set(key, value, time, TimeUnit.SECONDS);
+                redisTemplate.opsForValue().set(key, value, time, TimeUnit.DAYS);
             } else {
                 set(key, value);
             }
