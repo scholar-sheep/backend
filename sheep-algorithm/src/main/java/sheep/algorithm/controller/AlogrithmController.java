@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 
 @RestController
+@CrossOrigin
 public class AlogrithmController {
     @Autowired
     private RelationNetwork relationNetwork;
