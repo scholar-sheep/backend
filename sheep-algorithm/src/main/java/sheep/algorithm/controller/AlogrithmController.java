@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import sheep.algorithm.pojo.FieldResult;
 import sheep.algorithm.pojo.NetworkResult;
 import sheep.algorithm.service.HotField;
+import sheep.algorithm.service.OrgRank;
 import sheep.algorithm.service.RelationNetwork;
 import sheep.common.utils.ResultDTO;
 
@@ -21,6 +22,8 @@ public class AlogrithmController {
     private RelationNetwork relationNetwork;
     @Autowired
     private HotField hotField;
+    @Autowired
+    private OrgRank orgRank;
 
     @GetMapping(value = {"/network"})
     public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
@@ -32,5 +35,9 @@ public class AlogrithmController {
     public Object Search() throws IOException {
         FieldResult hotfields=hotField.getHot(10,2019,2020);
         return ResultDTO.okOf(hotfields);
+    }
+    @GetMapping(value = {"/orgRank"})
+    public Object Rank() throws IOException {
+       return ResultDTO.okOf(orgRank.getOrgRank());
     }
 }
