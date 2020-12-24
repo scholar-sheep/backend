@@ -136,8 +136,8 @@ public class RelationNetwork {
     public NetworkResult getNetwork(String id) throws IOException
     {
         //若redis中不存在则先存入
-        if(!redisUtil.hasKey("network"+id))
-            redisUtil.set("network"+id,this.generateNetwork(id),15);
+        //if(!redisUtil.hasKey("network"+id))
+            //redisUtil.set("network"+id,this.generateNetwork(id),15);
        return (NetworkResult)redisUtil.get("network"+id);
     }
 }

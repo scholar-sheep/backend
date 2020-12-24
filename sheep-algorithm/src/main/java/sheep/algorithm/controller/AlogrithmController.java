@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import sheep.algorithm.pojo.NetworkResult;
+import sheep.algorithm.service.HotField;
 import sheep.algorithm.service.RelationNetwork;
 import sheep.common.utils.ResultDTO;
 
@@ -17,11 +18,18 @@ import java.util.ArrayList;
 public class AlogrithmController {
     @Autowired
     private RelationNetwork relationNetwork;
+    @Autowired
+    private HotField hotField;
 
     @GetMapping(value = {"/network"})
     public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
         NetworkResult network = relationNetwork.getNetwork(portal_id);
        // NetworkResult network= relationNetwork.generateNetwork(portal_id);
         return ResultDTO.okOf(network);
+    }
+    @GetMapping(value = {"/hotfields"})
+    public Object Search() throws IOException {
+        ArrayList<String> hotfields=hotField.getHot(10,2019,2020);
+        return ResultDTO.okOf(hotfields);
     }
 }

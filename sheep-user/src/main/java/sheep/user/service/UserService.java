@@ -21,6 +21,7 @@ public interface UserService {
         User getUserByTel(String mobile);
 
         int updateUserInfo(User user);
+        int updateUserPassword(int ID,String password);
 
         int addUser(User user);
 
