@@ -99,7 +99,7 @@ public class AdvancedSearchImp implements SearchPaperService {
                     (int) total / pagesize : (int) total / pagesize + 1;
             result.setTotalPages(totalPages);
 
-
+            /*
             //3.查询结果涉及的领域
             List <SearchResult.fieldVo> fieldVos=new ArrayList<>();
             Aggregations aggregations =searchResponse.getAggregations();
@@ -111,7 +111,7 @@ public class AdvancedSearchImp implements SearchPaperService {
                 SearchResult.fieldVo fieldVo=new SearchResult.fieldVo(field,num);
                 fieldVos.add(fieldVo);
             }
-            result.setFields(fieldVos);
+            result.setFields(fieldVos);*/
             /*
             //4.查询结果涉及的作者
             List <String> authorNames=new ArrayList<>();
@@ -323,6 +323,7 @@ public class AdvancedSearchImp implements SearchPaperService {
             searchSourceBuilder.sort(sortSplit[0], sortSplit[1].equalsIgnoreCase("asc") ? SortOrder.ASC : SortOrder.DESC);
         }
 
+        /*
         //5.聚合
         //5.1按照keywords 聚合 指定返回前2条记录
 

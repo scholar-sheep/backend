@@ -98,7 +98,7 @@ public class PassportController {
     }
 
     //获取验证码
-    @PostMapping("passport/code/{mobile}")
+    @PostMapping("/passport/code/{mobile}")
     public Object getCode(@PathVariable("mobile") String mobile){
 //        @PostMapping("/code")
 //        public Object getCode(@RequestParam("mobile") String mobile){

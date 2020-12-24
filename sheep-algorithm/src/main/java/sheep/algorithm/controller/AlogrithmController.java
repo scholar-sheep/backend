@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 
 @RestController
+@CrossOrigin
 public class AlogrithmController {
     @Autowired
     private RelationNetwork relationNetwork;
@@ -25,7 +26,7 @@ public class AlogrithmController {
     @Autowired
     private OrgRank orgRank;
 
-    @GetMapping(value = {"/network"})
+    @GetMapping(value = {"/algorithm/network"})
     public Object Search(@RequestParam(value = "portal_id") String portal_id) throws IOException {
         NetworkResult network = relationNetwork.getNetwork(portal_id);
        // NetworkResult network= relationNetwork.generateNetwork(portal_id);
@@ -37,7 +38,7 @@ public class AlogrithmController {
         FieldResult hotfields=hotField.getHot(10,2019,2020);
         return ResultDTO.okOf(hotfields);
     }
-    @GetMapping(value = {"/orgRank"})
+    @GetMapping(value = {"/algorithm/orgRank"})
     public Object Rank() throws IOException {
        return ResultDTO.okOf(orgRank.getOrgRank());
     }
