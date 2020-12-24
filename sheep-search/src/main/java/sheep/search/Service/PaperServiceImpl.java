@@ -28,25 +28,29 @@ public class PaperServiceImpl implements PaperService {
         GetResponse response = restHighLevelClient.get(getRequest, RequestOptions.DEFAULT);
         Map<String, Object> res = response.getSourceAsMap();
         List<String> keywords = (List<String>) res.get("keywords");
-        List<Map<String, Object>> authorList =  (List<Map<String, Object>>) res.get("authors");
-        List<String> authorNameList = new ArrayList<>();
-        for (Map author : authorList) {
-            String name;
-            try {
-                name = (String) author.get("name");
-            } catch (Exception e) {
-                continue;
-            }
-            if (name!=null && !name.equals("")) {
-                authorNameList.add(name);
-            }
-        }
+//        List<Map<String, Object>> authorList =  (List<Map<String, Object>>) res.get("authors");
+//        List<String> authorNameList = new ArrayList<>();
+//        for (Map author : authorList) {
+//            String name;
+//            try {
+//                name = (String) author.get("name");
+//            } catch (Exception e) {
+//                continue;
+//            }
+//            if (name!=null && !name.equals("")) {
+//                authorNameList.add(name);
+//            }
+//        }
         StringBuilder sb = new StringBuilder();
         for (String s : keywords) {
             if (!s.equals("")) {
                 sb.append(s);
                 sb.append(' ');
+                break;
             }
+        }
+        if (sb.length()<=0) {
+            return null;
         }
         sb.deleteCharAt(sb.length()-1);
         SearchParam searchParam = new SearchParam();
