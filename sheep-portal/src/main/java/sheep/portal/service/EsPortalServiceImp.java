@@ -129,6 +129,7 @@ public class EsPortalServiceImp implements EsPortalService{
     }
     @Override
     public void setPaperList(String id) throws IOException {
+        System.out.println("intosetp");
         GetRequest getRequest = new GetRequest("sheep-scholar", id);
         GetResponse response =  highLevelClient.get(getRequest, RequestOptions.DEFAULT);
         String sourceAsString = response.getSourceAsString();
@@ -140,7 +141,8 @@ public class EsPortalServiceImp implements EsPortalService{
             for (EsPortal.Pub pub : pubs) {
                 PaperModel paperModel = this.getPaperDetail(pub.getI());
                 if(paperModel==null)continue;
-                redisUtil.lSet(id, paperModel);
+                if(paperModel!=null)
+                    redisUtil.lSet(id, paperModel);
             }
         }
 
@@ -149,9 +151,8 @@ public class EsPortalServiceImp implements EsPortalService{
     @Override
     public List<PaperModel> getPaperList(String id, String sort) throws IOException
     {
-        //若redis中不存在则先存入
-        //if(!redisUtil.hasKey(id))
-        this.setPaperList(id);
+        if(!redisUtil.hasKey(id))
+            this.setPaperList(id);
         PaperList paperList = new PaperList();
         List<PaperModel> list = (List)redisUtil.sort(id, id+"->", sort);
         return list;
