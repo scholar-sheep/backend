@@ -21,7 +21,9 @@ import sheep.portal.service.PortalService;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class PortalController {
@@ -255,7 +257,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-//            int user_id = 3;
+//            int user_id = 1;
             portalService.follow(portal_id, user_id);
         }
         catch(FollowFailException e){
@@ -276,7 +278,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
-//            int user_id = 2;
+//            int user_id = 1;
             portalService.unfollow(portal_id, user_id);
         }
         catch (Exception e){
@@ -307,6 +309,7 @@ public class PortalController {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             HttpServletRequest request = attributes.getRequest();
             int user_id = Integer.parseInt(request.getHeader("X-UserId"));
+//            int user_id = 1;
             List<String> idList = portalService.followList(user_id);
             List<EsPortal> followList = new ArrayList<>();
             for(String id : idList){
