@@ -6,14 +6,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.search.*;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.common.unit.TimeValue;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import sheep.algorithm.config.Client;
 import sheep.algorithm.config.RedisUtil;
+import sheep.algorithm.pojo.FieldResult;
 import sheep.algorithm.pojo.NetworkResult;
 import com.alibaba.fastjson.JSON;
 import sheep.algorithm.pojo.PaperModel;
@@ -142,11 +146,43 @@ public class HotField{
         }
         return returnMap;
     }
-    public ArrayList<String> getHot(int n, int from, int to) throws IOException
+    public FieldResult getHot(int n, int from, int to) throws IOException
     {
+        if(!redisUtil.hasKey("hotfields")){
+        RestHighLevelClient client = Client.getClient();
+        FieldResult fieldResults =new FieldResult();
+        List<FieldResult.Field> results=new ArrayList<>();
         //若redis中不存在则先存入
         if(!redisUtil.hasKey("hotfields"+from+to))
             redisUtil.set("hotfields"+from+to,this.getHotField(n,from,to),15);
-        return (ArrayList<String>)redisUtil.get("hotfields"+from+to);
+        ArrayList<String> fields=(ArrayList<String>)redisUtil.get("hotfields"+from+to);
+        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+        BoolQueryBuilder boolQueryBuilder = new BoolQueryBuilder();
+
+        for(String field:fields)
+        {
+            FieldResult.Field fieldResult=new FieldResult.Field();
+            searchSourceBuilder.query(QueryBuilders.termQuery("keywords.raw",field)).sort("n_citation", SortOrder.DESC).size(5);
+            SearchRequest request = new SearchRequest(new String[]{"sheep-paper"}, searchSourceBuilder);
+            SearchResponse searchResponse = client.search(request, RequestOptions.DEFAULT);
+            SearchHits hits = searchResponse.getHits();
+            //1. 封装查询到的论文信息
+            if (hits.getHits()!=null&&hits.getHits().length>0)
+            {
+                fieldResult.setField(field);
+                List<PaperModel> paperModels = new ArrayList<>();
+                for (SearchHit hit : hits) {
+                    String sourceAsString = hit.getSourceAsString();
+                    PaperModel paperModel = JSON.parseObject(sourceAsString, PaperModel.class);
+                    paperModels.add(paperModel);
+                }
+                fieldResult.setPapers(paperModels);
+
+            }
+            results.add(fieldResult);
+        }
+        fieldResults.setFields(results);
+        redisUtil.set("hotfields",fieldResults,15);}
+        return (FieldResult) redisUtil.get("hotfields");
     }
 }

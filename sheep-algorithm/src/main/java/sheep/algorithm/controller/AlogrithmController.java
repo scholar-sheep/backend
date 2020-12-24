@@ -3,6 +3,7 @@ package sheep.algorithm.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
+import sheep.algorithm.pojo.FieldResult;
 import sheep.algorithm.pojo.NetworkResult;
 import sheep.algorithm.service.HotField;
 import sheep.algorithm.service.RelationNetwork;
@@ -29,7 +30,7 @@ public class AlogrithmController {
     }
     @GetMapping(value = {"/hotfields"})
     public Object Search() throws IOException {
-        ArrayList<String> hotfields=hotField.getHot(10,2019,2020);
+        FieldResult hotfields=hotField.getHot(10,2019,2020);
         return ResultDTO.okOf(hotfields);
     }
 }
