@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.util.*;
 
 @RestController
+@CrossOrigin
 public class PortalController {
     @Autowired
     PortalService portalService;
@@ -110,11 +111,14 @@ public class PortalController {
      * @return
      */
     @CrossOrigin
-    @RequestMapping(value = "/portal", method = RequestMethod.GET)
+    @RequestMapping(value = "/portal/portal", method = RequestMethod.GET)
     public Object getInformation(@RequestParam(value = "sort",required = false) String sort,
                                  @RequestParam(value= "id") String id) {
         try{
             EsPortal esPortal = esPortalService.getInformation(id);
+            if (esPortal==null) {
+                return ResultDTO.errorOf(ErrorType.PORTAL_ERROR);
+            }
             List<PaperModel> paperList = esPortalService.getPaperList(id, sort);
             WholePortal wholePortal = new WholePortal(esPortal,paperList);
             return ResultDTO.okOf(wholePortal);
