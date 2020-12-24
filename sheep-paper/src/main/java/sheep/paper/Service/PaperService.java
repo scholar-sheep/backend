@@ -4,6 +4,7 @@ import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import sheep.paper.Entity.BriefPaperInfo;
 import sheep.paper.Entity.Favorite;
+import sheep.paper.Entity.PaperData;
 
 import java.io.IOException;
 import java.util.List;
@@ -60,4 +61,5 @@ public interface PaperService {
      * @return java.util.List<sheep.paper.Entity.Favorite>
      **/
     List<Favorite> getfavorites(int ID);
+    public PaperData getPaperDetailById(String paperIdStr);
 }

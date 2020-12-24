@@ -32,20 +32,19 @@ public class PaperController {
      **/
     @GetMapping("/info")
     public Object getEsInfoById(@RequestParam String paperIdStr, HttpServletRequest request) {
-        String paperInfoStr = paperService.getEsInfoById(paperIdStr);
-        if (paperInfoStr==null) {
+        PaperData paperData = paperService.getPaperDetailById(paperIdStr);
+        if (paperData==null) {
             return ResultDTO.errorOf(ErrorType.PAPER_NOT_EXIST_ERROR);
         }
         else {
-            PaperData paper = JSON.parseObject(paperInfoStr, PaperData.class);
             int userId;
             try {
                 userId = Integer.parseInt(request.getHeader("X-UserId"));
-                paper.setFavored(paperService.checkFavor(userId, paperIdStr));
+                paperData.setFavored(paperService.checkFavor(userId, paperIdStr));
             } catch (Exception e) {
                 ;
             }
-            return ResultDTO.okOf(paper);
+            return ResultDTO.okOf(paperData);
         }
     }
 
