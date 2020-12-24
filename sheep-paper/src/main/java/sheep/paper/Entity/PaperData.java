@@ -20,6 +20,11 @@ public class PaperData {
     private int n_citation;
     private List<String> url;
     private List<PaperModel> paperList;
+    private String issn;
+    private String isbn;
+    private String pdf;
+    private String publisher;
+    private List<String> keywords;
     @Data
     @AllArgsConstructor
     public static class Author
